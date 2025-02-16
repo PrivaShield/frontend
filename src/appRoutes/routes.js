@@ -5,8 +5,6 @@ import LoginPage from "../components/LoginPage";
 import SignupPage from "../components/SignupPage";
 import HeroPage from "../components/HeroPage";
 import Dashboard from "../components/Dashboard";
-import CustomWordsPage from "../components/CustomWordsPage";
-import AlertBannerPage from "../components/AlertBannerPage";
 import MyPage from "../components/MyPage";
 const AppRoutes = () => {
   return (
@@ -16,8 +14,6 @@ const AppRoutes = () => {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/hero" element={<HeroPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/customword" element={<CustomWordsPage />} />
-      <Route path="/alertbanner" element={<AlertBannerPage />} />
       <Route path="/mypage" element={<MyPage />} />
     </Routes>
   );
