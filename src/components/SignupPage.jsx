@@ -1,245 +1,7 @@
 import React, { useState } from "react";
-import styled from "styled-components";
-
-const PageContainer = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: white;
-  display: flex;
-  flex-direction: column;
-`;
-
-const NavBar = styled.nav`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-`;
-
-const Logo = styled.div`
-  height: 50px;
-  svg {
-    height: 100%;
-    width: auto;
-  }
-`;
-
-const MainContent = styled.main`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-`;
-
-const SignupCard = styled.div`
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2.5rem;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 480px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #2563eb, #1d4ed8);
-  }
-`;
-
-const Title = styled.h2`
-  font-size: 1.75rem;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 0.5rem;
-  text-align: center;
-`;
-
-const Subtitle = styled.p`
-  color: #94a3b8;
-  text-align: center;
-  margin-bottom: 2rem;
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-`;
-
-const InputGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const Label = styled.label`
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #e2e8f0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: white;
-  outline: none;
-  transition: all 0.2s;
-
-  &:focus {
-    border-color: #2563eb;
-    background: rgba(37, 99, 235, 0.1);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-  }
-
-  &::placeholder {
-    color: #64748b;
-  }
-`;
-
-const ErrorText = styled.span`
-  color: #ef4444;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-`;
-
-const Button = styled.button`
-  width: 100%;
-  padding: 0.875rem;
-  background: linear-gradient(90deg, #2563eb, #1d4ed8);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-const Divider = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 1.5rem 0;
-
-  &::before,
-  &::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-`;
-
-const DividerText = styled.span`
-  color: #94a3b8;
-  font-size: 0.875rem;
-`;
-
-const LoginLink = styled.button`
-  width: 100%;
-  padding: 0.875rem;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-`;
-
-const AnimatedCircuit = styled.div`
-  position: absolute;
-  width: 800px;
-  height: 800px;
-  border: 1px solid rgba(37, 99, 235, 0.1);
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-
-  &::before {
-    content: "";
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    border: 1px solid rgba(37, 99, 235, 0.15);
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-`;
-
-const RequirementText = styled.p`
-  color: #94a3b8;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-`;
-
-const CheckboxGroup = styled.div`
-  display: flex;
-  align-items: start;
-  gap: 0.75rem;
-  margin-top: 1rem;
-`;
-
-const Checkbox = styled.input`
-  margin-top: 0.25rem;
-`;
-
-const TermsText = styled.p`
-  color: #94a3b8;
-  font-size: 0.875rem;
-  line-height: 1.5;
-
-  a {
-    color: #2563eb;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
+import { useNavigate } from "react-router-dom";
+import styles from "../styles/SignupPage.module.css";
+import NavBar from "./NavBar";
 const SignupPage = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -309,45 +71,29 @@ const SignupPage = () => {
     }
   };
 
+  const navigate = useNavigate(); 
+
+  const handleStartClick = () => {
+    navigate("/login"); 
+  };
+  const handleStartClick2 = () => {
+    navigate("/dashboard"); 
+  };
   return (
-    <PageContainer>
-      <NavBar>
-        <Logo>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50">
-            <path
-              d="M40 10 L50 15 L50 35 L40 40 L30 35 L30 15 Z"
-              fill="#2563eb"
-            />
-            <path
-              d="M40 12 L48 16 L48 34 L40 38 L32 34 L32 16 Z"
-              fill="#1d4ed8"
-            />
-            <circle cx="40" cy="22" r="2" fill="white" />
-            <rect x="38" y="24" width="4" height="8" rx="1" fill="white" />
-            <text
-              x="60"
-              y="35"
-              fontFamily="Arial"
-              fontWeight="bold"
-              fontSize="24"
-              fill="#e2e8f0"
-            >
-              Priva<tspan fill="#2563eb">Shield</tspan>
-            </text>
-          </svg>
-        </Logo>
-      </NavBar>
+    <div className={styles.pageContainer}>
+      <NavBar />
 
-      <MainContent>
-        <AnimatedCircuit />
-        <SignupCard>
-          <Title>회원가입</Title>
-          <Subtitle>PrivaShield와 함께 시작하세요</Subtitle>
+      <main className={styles.mainContent}>
+        <div className={styles.animatedCircuit} />
+        <div className={styles.signupCard}>
+          <h2 className={styles.title}>회원가입</h2>
+          <p className={styles.subtitle}>PrivaShield와 함께 시작하세요</p>
 
-          <Form onSubmit={handleSubmit}>
-            <InputGroup>
-              <Label htmlFor="email">이메일</Label>
-              <Input
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="email">이메일</label>
+              <input
+                className={styles.input}
                 id="email"
                 name="email"
                 type="email"
@@ -356,12 +102,13 @@ const SignupPage = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.email && <ErrorText>{errors.email}</ErrorText>}
-            </InputGroup>
+              {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+            </div>
 
-            <InputGroup>
-              <Label htmlFor="password">비밀번호</Label>
-              <Input
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="password">비밀번호</label>
+              <input
+                className={styles.input}
                 id="password"
                 name="password"
                 type="password"
@@ -370,15 +117,16 @@ const SignupPage = () => {
                 onChange={handleChange}
                 required
               />
-              <RequirementText>
+              <p className={styles.requirementText}>
                 8자 이상의 비밀번호를 입력해주세요
-              </RequirementText>
-              {errors.password && <ErrorText>{errors.password}</ErrorText>}
-            </InputGroup>
+              </p>
+              {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+            </div>
 
-            <InputGroup>
-              <Label htmlFor="confirmPassword">비밀번호 확인</Label>
-              <Input
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="confirmPassword">비밀번호 확인</label>
+              <input
+                className={styles.input}
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
@@ -388,13 +136,14 @@ const SignupPage = () => {
                 required
               />
               {errors.confirmPassword && (
-                <ErrorText>{errors.confirmPassword}</ErrorText>
+                <span className={styles.errorText}>{errors.confirmPassword}</span>
               )}
-            </InputGroup>
+            </div>
 
-            <InputGroup>
-              <Label htmlFor="name">이름</Label>
-              <Input
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="name">이름</label>
+              <input
+                className={styles.input}
                 id="name"
                 name="name"
                 type="text"
@@ -403,12 +152,13 @@ const SignupPage = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.name && <ErrorText>{errors.name}</ErrorText>}
-            </InputGroup>
+              {errors.name && <span className={styles.errorText}>{errors.name}</span>}
+            </div>
 
-            <InputGroup>
-              <Label htmlFor="phone">전화번호</Label>
-              <Input
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="phone">전화번호</label>
+              <input
+                className={styles.input}
                 id="phone"
                 name="phone"
                 type="tel"
@@ -417,39 +167,40 @@ const SignupPage = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.phone && <ErrorText>{errors.phone}</ErrorText>}
-            </InputGroup>
+              {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
+            </div>
 
-            <CheckboxGroup>
-              <Checkbox
+            <div className={styles.checkboxGroup}>
+              <input
+                className={styles.checkbox}
                 type="checkbox"
                 id="agreeToTerms"
                 name="agreeToTerms"
                 checked={formData.agreeToTerms}
                 onChange={handleChange}
               />
-              <TermsText>
-                <Label htmlFor="agreeToTerms">
+              <p className={styles.termsText}>
+                <label className={styles.label} htmlFor="agreeToTerms">
                   <a href="#">서비스 이용약관</a>과{" "}
                   <a href="#">개인정보처리방침</a>에 동의합니다
-                </Label>
+                </label>
                 {errors.agreeToTerms && (
-                  <ErrorText>{errors.agreeToTerms}</ErrorText>
+                  <span className={styles.errorText}>{errors.agreeToTerms}</span>
                 )}
-              </TermsText>
-            </CheckboxGroup>
+              </p>
+            </div>
 
-            <Button type="submit">회원가입</Button>
-          </Form>
+            <button className={styles.button} type="submit" onClick={handleStartClick2}>회원가입</button>
+          </form>
 
-          <Divider>
-            <DividerText>또는</DividerText>
-          </Divider>
+          <div className={styles.divider}>
+            <span className={styles.dividerText}>또는</span>
+          </div>
 
-          <LoginLink type="button">로그인하기</LoginLink>
-        </SignupCard>
-      </MainContent>
-    </PageContainer>
+          <button className={styles.loginLink} type="button" onClick={handleStartClick}>로그인하기</button>
+        </div>
+      </main>
+    </div>
   );
 };
 
