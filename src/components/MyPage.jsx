@@ -12,11 +12,6 @@ const ProfileEditPage = () => {
     password: "••••••••",
   });
 
-
-  const handleStartClick = () => {
-    navigate("/dashboard"); // ✅ "시작하기" 버튼 클릭 시 /login으로 이동
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProfileData(prev => ({
@@ -32,7 +27,7 @@ const ProfileEditPage = () => {
   };
 
   const navigateToDashboard = () => {
-    // 대시보드로 이동하는 로직 (실제로는 Router를 사용)
+    navigate("/dashboard"); 
     console.log("대시보드로 이동");
     // 예: router.push('/dashboard');
   };
@@ -58,7 +53,7 @@ const ProfileEditPage = () => {
             onClick={navigateToDashboard} 
             className={`${styles.button} ${styles.dashboardButton}`}
           >
-            <span className={styles.buttonIcon} onClick={handleStartClick}>📊</span>
+            <span className={styles.buttonIcon}>📊</span>
             대시보드
           </button>
         </div>

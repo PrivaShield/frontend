@@ -758,6 +758,86 @@ body {
   margin-right: auto;
 }
 
+/* Blurred content container */
+.lockedContentContainer {
+  position: relative;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+/* Blur effect for steps when not logged in */
+.blurredContent {
+  filter: blur(4px);
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Blurred step cards */
+.stepCard.blurred {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Login prompt overlay */
+.loginPrompt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  color: #1c49a9;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 80%;
+  max-width: 400px;
+  z-index: 10;
+}
+
+/* Lock icon */
+.lockIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  padding: 1rem;
+  border-radius: 50%;
+  background: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lockIcon svg {
+  width: 32px;
+  height: 32px;
+  fill: white;
+}
+
+/* Login button */
+.loginButton {
+  background-color: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border: 1px solid #2563eb;
+  font-weight: 600;
+  padding: 0.8rem 1.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginButton:hover {
+  background-color: #2563eb;
+  color: white;
+  box-shadow: 0 4px 10px rgba(49, 114, 192, 0.3);
+}
+
 /* Footer */
 .footer {
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
@@ -812,6 +892,7 @@ body {
   font-size: 0.875rem;
   color: #64748b;
 }
+
 
 /* Animations */
 @keyframes fadeInUp {

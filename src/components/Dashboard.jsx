@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";  // useEffect를 import
+import { useNavigate } from "react-router-dom";    // useNavigate를 import
+import axios from "axios";
 import styles from '../styles/Dashboard.module.css';
 import NavBar from "./NavBar";
+
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const securityData = [
     { type: "주소", count: 150 },
     { type: "전화번호", count: 120 },
@@ -9,6 +16,28 @@ const Dashboard = () => {
     { type: "주민번호", count: 80 },
     { type: "신용카드", count: 50 },
   ];
+
+  useEffect(() => {
+    // 로그인 상태 확인
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    
+    if (!token || !storedUser) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+    
+    setUser(JSON.parse(storedUser));
+    setIsLoading(false);
+    
+    // 토큰 유효성 검증 (선택적)
+    // 서버에 토큰 검증 요청을 보내고 유효하지 않으면 로그아웃 처리
+  }, [navigate]);
+
+  if (isLoading) {
+    return <div className={styles.loading}>로딩 중...</div>;
+  }
 
   const maxCount = Math.max(...securityData.map((item) => item.count));
 

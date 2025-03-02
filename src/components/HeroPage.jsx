@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate , useLocation} from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "../styles/HeroPage.module.css";
 import NavBar from "./NavBar";
+
 // Animated Shield Icon Component
 const AnimatedShield = () => {
   return (
@@ -48,29 +49,16 @@ const HeroPage = () => {
   const location = useLocation(); 
   const [scrolled, setScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [user, setUser] = useState(null);
   const heroContainerRef = useRef(null);
   
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const scrollTo = params.get("scrollTo");
-  
-    if (scrollTo) {
-      setTimeout(() => {
-        const element = document.getElementById(scrollTo);
-        if (element) {
-          const navBar = document.querySelector(`.${styles.navBar}`);
-          const navBarHeight = navBar ? navBar.offsetHeight : 80; // 네비게이션 바 높이 고려
-  
-          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-          
-          window.scrollTo({
-            top: elementPosition - navBarHeight - 10, // 네비 높이만큼 조정
-            behavior: "smooth",
-          });
-        }
-      }, 500);
-    }
-  }, [location]);
+    // Check if user is logged in - replace this with your actual auth check
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }    
+  }, []);
   
 
   useEffect(() => {
@@ -113,7 +101,11 @@ const HeroPage = () => {
   }, []);
 
   const handleStartClick = () => {
-    navigate("/login");
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/login");
+    }
   };
 
   const handleCopyCode = (code) => {
@@ -131,12 +123,12 @@ const HeroPage = () => {
     }
   };
 
-  // 북마크릿 코드
+  // 북마크릿 코드 - 로그인 시에만 실제 코드를 보여줄 것임
   const bookmarkletCode = `일단 비워둠`;
 
   return (
     <>
-      <div className={styles.heroContainer} ref={heroContainerRef}>
+      <div id="topOfPage" className={styles.heroContainer} ref={heroContainerRef}>
         <NavBar scrolled={scrolled} />
 
         <main className={styles.mainContent}>
@@ -166,7 +158,7 @@ const HeroPage = () => {
               </p>
             </div>
             <button className={styles.ctaButton} onClick={handleStartClick}>
-              <span>지금 시작하기</span>
+              <span>{user ? "대시보드로 이동" : "지금 시작하기"}</span>
               <svg viewBox="0 0 24 24">
                 <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
               </svg>
@@ -263,17 +255,19 @@ const HeroPage = () => {
         </div>
       </section>
 
-      <><section id="howto" className={styles.howtoSection}>
-          <div className={styles.sectionContainer}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>
-                <span className={styles.titleHighlight}>간단한</span> 이용 방법
-              </h2>
-              <p className={styles.sectionSubtitle}>
-                PrivaShield를 쉽고, 빠르게 설치하여 지금 바로 이용해보세요
-              </p>
-            </div>
+      <section id="howto" className={styles.howtoSection}>
+        <div className={styles.sectionContainer}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.titleHighlight}>간단한</span> 이용 방법
+            </h2>
+            <p className={styles.sectionSubtitle}>
+              PrivaShield를 쉽고, 빠르게 설치하여 지금 바로 이용해보세요
+            </p>
+          </div>
 
+          {/* 로그인 여부에 따른 컨텐츠 표시 방식 변경 */}
+          {user ? (
             <div className={styles.stepsContainer}>
               {[
                 {
@@ -330,40 +324,106 @@ const HeroPage = () => {
                 </div>
               ))}
             </div>
-
-            <div className={styles.ctaSection}>
-              <h3 className={styles.ctaTitle}>지금 바로 시작하세요</h3>
-              <p className={styles.ctaText}>PrivaShield와 함께 개인정보를 안전하게 보호하세요.</p>
-              <button className={styles.ctaButton} onClick={handleStartClick}>시작하기</button>
+          ) : (
+            /* 로그인 전에는 블러 처리된 영역과 로그인 유도 메시지 표시 */
+            <div className={styles.lockedContentContainer}>
+              <div className={styles.blurredContent}>
+                {[
+                  {
+                    number: 1,
+                    title: "북마크바 열기",
+                    description: "Chrome 브라우저에서 Ctrl+Shift+B (Windows) 또는 Command+Shift+B (Mac)를 눌러 북마크바를 엽니다.",
+                    icon: <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" /></svg>
+                  },
+                  {
+                    number: 2,
+                    title: "북마크 추가하기",
+                    description: "북마크바의 빈 공간에서 우클릭 후 '페이지 추가'를 선택합니다. 이름은 'PrivaShield 개인정보 감지'로 설정해주세요.",
+                    icon: <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
+                  },
+                  {
+                    number: 3,
+                    title: "코드 붙여넣기",
+                    description: "URL 필드에 아래 코드를 붙여넣습니다:",
+                    code: "***** 로그인 후 확인 가능 *****",
+                    icon: <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" /></svg>
+                  },
+                  {
+                    number: 4,
+                    title: "사용하기",
+                    description: "ChatGPT 페이지에서 북마크를 클릭하면 개인정보 감지 기능이 활성화됩니다. 새로고침 시 재실행이 필요합니다.",
+                    icon: <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
+                  }
+                ].map((step, index) => (
+                  <div key={index} className={`${styles.stepCard} ${styles.blurred}`}>
+                    <div className={styles.stepIconContainer}>
+                      <div className={styles.stepIcon}>{step.icon}</div>
+                      <div className={styles.stepNumber}>{step.number}</div>
+                    </div>
+                    <div className={styles.stepContent}>
+                      <h3 className={styles.stepTitle}>{step.title}</h3>
+                      <p className={styles.stepDescription}>{step.description}</p>
+                      {step.code && (
+                        <div className={styles.codeBlockContainer}>
+                          <div className={styles.codeBlock}>
+                            <div className={styles.codeContent}>{step.code}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.loginPrompt}>
+                <div className={styles.lockIcon}>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                  </svg>
+                </div>
+                <h3>로그인 후 이용 가능합니다</h3>
+                <p>PrivaShield의 전체 기능을 이용하시려면 로그인이 필요합니다.</p>
+                <button className={styles.loginButton} onClick={() => navigate("/login")}>로그인하기</button>
+              </div>
             </div>
+          )}
+
+          <div className={styles.ctaSection}>
+            <h3 className={styles.ctaTitle}>지금 바로 시작하세요</h3>
+            <p className={styles.ctaText}>PrivaShield와 함께 개인정보를 안전하게 보호하세요.</p>
+            <button className={styles.ctaButton} onClick={handleStartClick}>
+              {user ? "대시보드로 이동" : "로그인하기"}
+            </button>
           </div>
-        </section><footer className={styles.footer}>
-            <div className={styles.footerContainer}>
-              <div className={styles.footerSection}>
-                <h4 className={styles.footerTitle}>PrivaShield</h4>
-                <p className={styles.footerText}>
-                  AI 기반 개인정보 보호 솔루션으로 데이터의 안전을 지켜드립니다.
-                </p>
-              </div>
+        </div>
+      </section>
 
-              <div className={styles.footerSection}>
-                <h4 className={styles.footerTitle}>제품</h4>
-                <a href="#howto" className={styles.footerLink}>서비스 소개</a>
-                <a href="#features" className={styles.footerLink}>기능</a>
-              </div>
+      <footer className={styles.footer}>
+        <div className={styles.footerContainer}>
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>PrivaShield</h4>
+            <p className={styles.footerText}>
+              AI 기반 개인정보 보호 솔루션으로 데이터의 안전을 지켜드립니다.
+            </p>
+          </div>
 
-              <div className={styles.footerSection}>
-                <h4 className={styles.footerTitle}>연락처</h4>
-                <p className={styles.footerText}>이메일: support@privashield.com</p>
-                <p className={styles.footerText}>전화: 1234-5678</p>
-                <p className={styles.footerText}>주소: 서울특별시 강남구</p>
-              </div>
-            </div>
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>제품</h4>
+            <a href="#howto" className={styles.footerLink}>서비스 소개</a>
+            <a href="#features" className={styles.footerLink}>기능</a>
+          </div>
 
-            <div className={styles.footerBottom}>
-              © 2024 PrivaShield. All rights reserved. | 개인정보 처리방침 | 서비스 약관
-            </div>
-          </footer></>
+          <div className={styles.footerSection}>
+            <h4 className={styles.footerTitle}>연락처</h4>
+            <p className={styles.footerText}>이메일: support@privashield.com</p>
+            <p className={styles.footerText}>전화: 1234-5678</p>
+            <p className={styles.footerText}>주소: 서울특별시 강남구</p>
+          </div>
+        </div>
+
+        <div className={styles.footerBottom}>
+          © 2024 PrivaShield. All rights reserved. | 개인정보 처리방침 | 서비스 약관
+        </div>
+      </footer>
     </>
   );
 };
