@@ -1,0 +1,143 @@
+.pageContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+  }
+  
+  
+  .userInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #e2e8f0;
+  }
+  
+  .mainContent {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .title {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 2rem;
+  }
+  
+  .statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .statsGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .statCard {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .statCard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  }
+  
+  .statTitle {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+  }
+  
+  .statValue {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 0.5rem;
+  }
+  
+  .statSubtext {
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+  
+  .dataGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .dataCard {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .dataCard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #2563eb, #1d4ed8);
+  }
+  
+  .dataTitle {
+    font-size: 1.125rem;
+    color: white;
+    margin-bottom: 1.5rem;
+  }
+  
+  .dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .th {
+    text-align: left;
+    padding: 1rem;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .td {
+    padding: 1rem;
+    color: #e2e8f0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .progressBar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .progress {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 4px;
+  }
