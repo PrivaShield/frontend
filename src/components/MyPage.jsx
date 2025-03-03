@@ -73,9 +73,9 @@ const ProfileEditPage = () => {
     try {
       // 비밀번호 변경 요청 (비밀번호가 입력된 경우)
       if (profileData.password) {
-        // 비밀번호 재설정 API 호출
+        // 비밀번호 변경 API 호출 (토큰 없는 새 엔드포인트 사용)
         const resetResponse = await fetch(
-          "http://localhost:5000/api/users/reset-password",
+          "http://localhost:5000/api/users/change-password",
           {
             method: "POST",
             headers: {
@@ -83,9 +83,6 @@ const ProfileEditPage = () => {
             },
             body: JSON.stringify({
               email: profileData.email,
-              // 참고: 실제 환경에서는 resetToken이 필요하지만 더미 데이터 환경에서는
-              // 백엔드에서 이 부분을 처리할 수 있도록 임시 토큰 사용
-              resetToken: "temporary-token",
               newPassword: profileData.password,
             }),
           }
@@ -113,25 +110,19 @@ const ProfileEditPage = () => {
         }
       }
 
-      // 이름 및 전화번호 업데이트 로직은 여기에 추가할 수 있습니다
-      // 현재는 비밀번호 변경만 구현
+      // 다른 프로필 정보 업데이트 로직이 있다면 여기 추가
 
       if (!profileData.password) {
         setSuccessMessage("프로필이 성공적으로 업데이트되었습니다.");
       }
 
-      setTimeout(() => setSuccessMessage(""), 3000); // 3초 후 메시지 사라짐
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.error("프로필 업데이트 오류:", error);
       setError(error.message);
-      setTimeout(() => setError(null), 3000); // 3초 후 오류 메시지 사라짐
+      setTimeout(() => setError(null), 3000);
     }
   };
-
-  const navigateToDashboard = () => {
-    navigate("/dashboard");
-  };
-
   // 회원 탈퇴 처리
   const handleDeleteAccount = async () => {
     if (
@@ -209,13 +200,6 @@ const ProfileEditPage = () => {
               <span>보안 점수: 85/100</span>
             </div>
           </div>
-          <button
-            onClick={navigateToDashboard}
-            className={`${styles.button} ${styles.dashboardButton}`}
-          >
-            <span className={styles.buttonIcon}>📊</span>
-            대시보드
-          </button>
         </div>
 
         <div className={styles.editCard}>
@@ -280,13 +264,6 @@ const ProfileEditPage = () => {
             <div className={styles.buttonGroup}>
               <button type="submit" className={styles.button}>
                 변경사항 저장
-              </button>
-              <button
-                type="button"
-                onClick={navigateToDashboard}
-                className={`${styles.button} ${styles.buttonOutline}`}
-              >
-                취소
               </button>
             </div>
           </form>
