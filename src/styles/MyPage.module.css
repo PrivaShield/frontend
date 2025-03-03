@@ -30,15 +30,43 @@
 }
 
 .profileAvatar {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  position: relative;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
+  background-color: #4a6cf7;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 24px;
   font-weight: bold;
+  overflow: hidden;
+}
+
+.avatarOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.profileAvatar:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.avatarHint {
+  font-size: 12px;
+  text-align: center;
+  padding: 5px;
 }
 
 .profileInfo {
@@ -112,20 +140,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.buttonIcon {
-  font-size: 1.25rem;
+  margin-bottom: 15px;
 }
 
 .button:hover {
   opacity: 0.9;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-}
-
-.dashboardButton {
-  white-space: nowrap;
 }
 
 .buttonOutline {
@@ -185,7 +206,7 @@
   .buttonGroup {
     flex-direction: column;
   }
-  
+
   .button {
     width: 100%;
   }
