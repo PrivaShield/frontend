@@ -8,7 +8,6 @@ const ProfileEditPage = () => {
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
-    phoneNumber: "",
     password: "",
   });
   const [loading, setLoading] = useState(true);
@@ -209,13 +208,6 @@ const ProfileEditPage = () => {
               <span>보안 점수: 85/100</span>
             </div>
           </div>
-          <button
-            onClick={navigateToDashboard}
-            className={`${styles.button} ${styles.dashboardButton}`}
-          >
-            <span className={styles.buttonIcon}>📊</span>
-            대시보드
-          </button>
         </div>
 
         <div className={styles.editCard}>
@@ -248,18 +240,6 @@ const ProfileEditPage = () => {
                 disabled // 이메일은 변경 불가
               />
               <p className={styles.formHelp}>이메일은 변경할 수 없습니다</p>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>전화번호</label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={profileData.phoneNumber}
-                onChange={handleInputChange}
-                className={styles.formInput}
-                required
-              />
             </div>
 
             <div className={styles.formGroup}>

@@ -114,9 +114,7 @@
   gap: 0.5rem;
 }
 
-.buttonIcon {
-  font-size: 1.25rem;
-}
+
 
 .button:hover {
   opacity: 0.9;
@@ -124,9 +122,7 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-.dashboardButton {
-  white-space: nowrap;
-}
+
 
 .buttonOutline {
   background: transparent;
