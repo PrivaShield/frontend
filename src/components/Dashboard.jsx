@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";  // useEffect를 import
-import { useNavigate } from "react-router-dom";    // useNavigate를 import
-import axios from "axios";
-import styles from '../styles/Dashboard.module.css';
+import React, { useEffect, useState } from "react"; // useEffect를 import
+import { useNavigate } from "react-router-dom"; // useNavigate를 import
+//import axios from "axios";
+import styles from "../styles/Dashboard.module.css";
 import NavBar from "./NavBar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  //const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const securityData = [
     { type: "주소", count: 150 },
     { type: "전화번호", count: 120 },
@@ -21,16 +21,16 @@ const Dashboard = () => {
     // 로그인 상태 확인
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-    
+
     if (!token || !storedUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
       return;
     }
-    
-    setUser(JSON.parse(storedUser));
+
+    //setUser(JSON.parse(storedUser));
     setIsLoading(false);
-    
+
     // 토큰 유효성 검증 (선택적)
     // 서버에 토큰 검증 요청을 보내고 유효하지 않으면 로그아웃 처리
   }, [navigate]);
@@ -43,8 +43,8 @@ const Dashboard = () => {
 
   return (
     <div className={styles.pageContainer}>
-      <NavBar/>
-      
+      <NavBar />
+
       <main className={styles.mainContent}>
         <h1 className={styles.title}>개인 안전 대시보드</h1>
 
@@ -76,7 +76,9 @@ const Dashboard = () => {
                 <tr>
                   <th className={styles.th}>유형</th>
                   <th className={styles.th}>횟수</th>
-                  <th className={styles.th} style={{ width: '50%' }}>분포</th>
+                  <th className={styles.th} style={{ width: "50%" }}>
+                    분포
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -86,8 +88,8 @@ const Dashboard = () => {
                     <td className={styles.td}>{item.count}</td>
                     <td className={styles.td}>
                       <div className={styles.progressBar}>
-                        <div 
-                          className={styles.progress} 
+                        <div
+                          className={styles.progress}
                           style={{ width: `${(item.count / maxCount) * 100}%` }}
                         />
                       </div>
