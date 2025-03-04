@@ -1,18 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import styles from "../styles/SignupPage.module.css";
 import NavBar from "./NavBar";
+
 const SignupPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
     name: "",
-    phone: "",
-    agreeToTerms: false,
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  // 임시로 가입된 이메일 목록 (실제로는 DB에서 확인)
+  // const registeredEmails = ["test@example.com", "user@example.com"];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -32,8 +37,7 @@ const SignupPage = () => {
     // 이메일 검증
     if (!formData.email.includes("@")) {
       newErrors.email = "올바른 이메일 주소를 입력해주세요";
-    }
-
+    } 
     // 비밀번호 검증
     if (formData.password.length < 8) {
       newErrors.password = "비밀번호는 8자 이상이어야 합니다";
@@ -49,12 +53,6 @@ const SignupPage = () => {
       newErrors.name = "이름을 입력해주세요";
     }
 
-    // 전화번호 검증
-    const phoneRegex = /^[0-9]{10,11}$/;
-    if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = "올바른 전화번호를 입력해주세요";
-    }
-
     // 약관 동의 검증
     if (!formData.agreeToTerms) {
       newErrors.agreeToTerms = "서비스 이용약관에 동의해주세요";
@@ -64,21 +62,53 @@ const SignupPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
     if (validateForm()) {
-      console.log("회원가입 시도:", formData);
+      try {
+        // API 호출을 통해 회원가입 처리
+        console.log("회원가입 시도:", formData);
+  
+        const response = await axios.post("http://localhost:5000/api/auth/signup", {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
+        
+        console.log("회원가입 성공:", response.data);
+        
+        // 성공 메시지 표시 (선택사항)
+        alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
+        
+        // 로그인 페이지로 리다이렉트
+        navigate("/login");
+        
+      } catch (error) {
+        // API 호출 중 에러 발생 시
+        console.error("회원가입 오류:", error);
+        
+        // 서버에서 오는 에러 메시지가 있다면 표시
+        if (error.response && error.response.data && error.response.data.message) {
+          alert(`회원가입 실패: ${error.response.data.message}`);
+        } else {
+          alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // 유효성 검사 실패 시
+      alert("입력 정보를 확인해주세요.");
+      setIsSubmitting(false);
     }
   };
 
-  const navigate = useNavigate(); 
-
-  const handleStartClick = () => {
+  const handleLoginClick = () => {
     navigate("/login"); 
   };
-  const handleStartClick2 = () => {
-    navigate("/dashboard"); 
-  };
+
   return (
     <div className={styles.pageContainer}>
       <NavBar />
@@ -90,6 +120,21 @@ const SignupPage = () => {
           <p className={styles.subtitle}>PrivaShield와 함께 시작하세요</p>
 
           <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="name">이름</label>
+              <input
+                className={styles.input}
+                id="name"
+                name="name"
+                type="text"
+                placeholder="이름을 입력하세요"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+              {errors.name && <span className={styles.errorText}>{errors.name}</span>}
+            </div>
+
             <div className={styles.inputGroup}>
               <label className={styles.label} htmlFor="email">이메일</label>
               <input
@@ -140,36 +185,6 @@ const SignupPage = () => {
               )}
             </div>
 
-            <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="name">이름</label>
-              <input
-                className={styles.input}
-                id="name"
-                name="name"
-                type="text"
-                placeholder="이름을 입력하세요"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-              {errors.name && <span className={styles.errorText}>{errors.name}</span>}
-            </div>
-
-            <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="phone">전화번호</label>
-              <input
-                className={styles.input}
-                id="phone"
-                name="phone"
-                type="tel"
-                placeholder="'-' 없이 입력해주세요"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
-              {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
-            </div>
-
             <div className={styles.checkboxGroup}>
               <input
                 className={styles.checkbox}
@@ -190,14 +205,22 @@ const SignupPage = () => {
               </p>
             </div>
 
-            <button className={styles.button} type="submit" onClick={handleStartClick2}>회원가입</button>
+            <button 
+              className={styles.button} 
+              type="submit" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "처리 중..." : "회원가입"}
+            </button>
           </form>
 
           <div className={styles.divider}>
             <span className={styles.dividerText}>또는</span>
           </div>
 
-          <button className={styles.loginLink} type="button" onClick={handleStartClick}>로그인하기</button>
+          <button className={styles.loginLink} type="button" onClick={handleLoginClick}>
+            로그인하기
+          </button>
         </div>
       </main>
     </div>
