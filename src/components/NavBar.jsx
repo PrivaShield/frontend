@@ -68,7 +68,7 @@ const NavBar = ({ scrolled }) => {
                 className={styles.welcomeText} 
                 onClick={handleMyPageClick}
               >
-              {user.name}
+              {user.user_name}
               </span>
             님
               <button className={styles.logoutButton} onClick={handleLogout}>로그아웃</button>
