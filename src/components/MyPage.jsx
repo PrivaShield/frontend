@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/MyPage.module.css";
 import NavBar from "./NavBar";
@@ -9,10 +9,12 @@ const ProfileEditPage = () => {
     name: "",
     email: "",
     password: "",
+    profileImage: "", // 프로필 이미지 URL 저장용
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const fileInputRef = useRef(null); // 파일 입력을 위한 ref
 
   // 페이지 로드 시 사용자 정보 조회
   useEffect(() => {
@@ -43,6 +45,7 @@ const ProfileEditPage = () => {
             email: data.data.email,
             phoneNumber: data.data.phoneNumber || "",
             password: "",
+            profileImage: data.data.profileImage || "",
           });
         } else {
           throw new Error(data.message || "사용자 정보를 불러올 수 없습니다.");
@@ -66,15 +69,79 @@ const ProfileEditPage = () => {
     }));
   };
 
+  // 프로필 이미지 클릭 핸들러
+  const handleAvatarClick = () => {
+    fileInputRef.current.click();
+  };
+
+  // 파일 선택 핸들러
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      // 파일 크기 검증 (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("파일 크기는 5MB 이하여야 합니다.");
+      }
+
+      // 파일 형식 검증
+      if (!file.type.startsWith("image/")) {
+        throw new Error("이미지 파일만 업로드할 수 있습니다.");
+      }
+
+      // FormData 생성
+      const formData = new FormData();
+      formData.append("email", profileData.email);
+      formData.append("profileImage", file);
+
+      // 프로필 이미지 업로드 API 호출
+      const response = await fetch(
+        "http://localhost:5000/api/users/profile_image",
+        {
+          method: "PATCH",
+          body: formData,
+          // FormData를 사용할 때는 Content-Type 헤더를 설정하지 않음
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("프로필 이미지 업로드 응답:", errorText);
+        throw new Error("프로필 이미지 업로드 중 오류가 발생했습니다.");
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 프로필 이미지 URL 업데이트
+        setProfileData((prev) => ({
+          ...prev,
+          profileImage: data.data.profileImage,
+        }));
+        setSuccessMessage("프로필 이미지가 업데이트되었습니다.");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } else {
+        throw new Error(
+          data.message || "프로필 이미지 업로드 중 오류가 발생했습니다."
+        );
+      }
+    } catch (error) {
+      console.error("프로필 이미지 업로드 오류:", error);
+      setError(error.message);
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       // 비밀번호 변경 요청 (비밀번호가 입력된 경우)
       if (profileData.password) {
-        // 비밀번호 재설정 API 호출
+        // 비밀번호 변경 API 호출 (change-password 엔드포인트 사용)
         const resetResponse = await fetch(
-          "http://localhost:5000/api/users/reset-password",
+          "http://localhost:5000/api/users/change-password",
           {
             method: "POST",
             headers: {
@@ -82,9 +149,6 @@ const ProfileEditPage = () => {
             },
             body: JSON.stringify({
               email: profileData.email,
-              // 참고: 실제 환경에서는 resetToken이 필요하지만 더미 데이터 환경에서는
-              // 백엔드에서 이 부분을 처리할 수 있도록 임시 토큰 사용
-              resetToken: "temporary-token",
               newPassword: profileData.password,
             }),
           }
@@ -190,14 +254,42 @@ const ProfileEditPage = () => {
         )}
 
         <div className={styles.profileHeader}>
-          <div className={styles.profileAvatar}>
-            {profileData.name
-              ? profileData.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-              : "U"}
+          {/* 프로필 이미지 업로드를 위한 숨겨진 파일 입력 */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            style={{ display: "none" }}
+          />
+
+          {/* 프로필 아바타 - 클릭 시 파일 선택 창 열림 */}
+          <div
+            className={styles.profileAvatar}
+            onClick={handleAvatarClick}
+            style={
+              profileData.profileImage
+                ? {
+                    backgroundImage: `url(http://localhost:5000${profileData.profileImage})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    cursor: "pointer",
+                  }
+                : { cursor: "pointer" }
+            }
+          >
+            {!profileData.profileImage &&
+              (profileData.name
+                ? profileData.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                : "U")}
+            <div className={styles.avatarOverlay}>
+              <span className={styles.avatarHint}>클릭하여 변경</span>
+            </div>
           </div>
+
           <div className={styles.profileInfo}>
             <h1 className={styles.profileName}>
               {profileData.name || "사용자"}
@@ -272,16 +364,12 @@ const ProfileEditPage = () => {
           </form>
 
           <div className={styles.dangerZone}>
-            <h3>위험 구역</h3>
             <button
               onClick={handleDeleteAccount}
               className={`${styles.button} ${styles.dangerButton}`}
             >
               회원 탈퇴
             </button>
-            <p className={styles.warningText}>
-              계정을 삭제하면 모든 데이터가 영구적으로 제거됩니다.
-            </p>
           </div>
         </div>
       </main>
