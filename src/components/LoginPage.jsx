@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../styles/LoginPage.module.css";
+import axios from "axios";
+import styles from "../styles/LoginPage.module.css"; // 기존 스타일 경로 유지
 import NavBar from "./NavBar";
-import axios from 'axios';
+import ForgotPasswordModal from "./ForgotPasswordModal"; // 분리된 모달 컴포넌트 import
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -92,6 +93,13 @@ const LoginPage = () => {
           </button>
         </div>
       </main>
+
+      {/* 분리된 비밀번호 찾기 모달 컴포넌트 사용 */}
+      <ForgotPasswordModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        loginEmail={email}
+      />
     </div>
   );
 };
