@@ -1,193 +1,103 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext"; // 전역 상태 사용
 import styles from "../styles/MyPage.module.css";
 import NavBar from "./NavBar";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
+  const { user, updateUser } = useUser();
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
     password: "",
-    profileImage: "", // 프로필 이미지 URL 저장용
+    profileImage: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  const fileInputRef = useRef(null); // 파일 입력을 위한 ref
+  const fileInputRef = useRef(null);
 
-  // 페이지 로드 시 사용자 정보 조회
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setLoading(true);
+    if (!user) {
+      navigate("/login");
+      return;
+    }
 
-        // 로컬 스토리지에서 저장된 이메일 가져오기 또는 테스트 이메일 사용
-        const userEmail =
-          localStorage.getItem("userEmail") || "test@example.com";
-
-        // 백엔드 서버의 전체 URL 사용
-        const response = await fetch(
-          `http://localhost:5000/api/users?email=${userEmail}`
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("API 응답 내용:", errorText);
-          throw new Error("사용자 정보를 불러올 수 없습니다.");
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-          setProfileData({
-            name: data.data.name || "",
-            email: data.data.email,
-            phoneNumber: data.data.phoneNumber || "",
-            password: "",
-            profileImage: data.data.profileImage || "",
-          });
-        } else {
-          throw new Error(data.message || "사용자 정보를 불러올 수 없습니다.");
-        }
-      } catch (error) {
-        console.error("회원 정보 조회 오류:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    setProfileData({
+      name: user.user_name || "",
+      email: user.email || "",
+      password: "",
+      profileImage: user.profile_image || "",
+    });
+    setLoading(false);
+  }, [user, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfileData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 프로필 이미지 클릭 핸들러
   const handleAvatarClick = () => {
     fileInputRef.current.click();
   };
 
-  // 파일 선택 핸들러
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
-      // 파일 크기 검증 (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error("파일 크기는 5MB 이하여야 합니다.");
-      }
-
-      // 파일 형식 검증
-      if (!file.type.startsWith("image/")) {
-        throw new Error("이미지 파일만 업로드할 수 있습니다.");
-      }
-
-      // FormData 생성
+      setError(null);
       const formData = new FormData();
       formData.append("email", profileData.email);
-      formData.append("profileImage", file);
+      formData.append("profileImage", file); // 서버에서 기대하는 필드명
 
-      // 프로필 이미지 업로드 API 호출
+      // 올바른 API URL - 언더스코어(_) 사용
       const response = await fetch(
         "http://localhost:5000/api/users/profile_image",
         {
-          method: "PATCH",
+          method: "POST",
           body: formData,
-          // FormData를 사용할 때는 Content-Type 헤더를 설정하지 않음
         }
       );
 
+      // 응답 상태 확인
+      console.log("서버 응답 상태:", response.status);
+
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("프로필 이미지 업로드 응답:", errorText);
-        throw new Error("프로필 이미지 업로드 중 오류가 발생했습니다.");
+        if (
+          response.headers.get("content-type")?.includes("application/json")
+        ) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "프로필 이미지 업로드 중 오류가 발생했습니다."
+          );
+        } else {
+          const text = await response.text();
+          console.log("에러 응답 텍스트:", text);
+          throw new Error("프로필 이미지 업로드 중 오류가 발생했습니다.");
+        }
       }
 
       const data = await response.json();
+      console.log("받은 데이터:", data);
 
       if (data.success) {
-        // 프로필 이미지 URL 업데이트
+        // 서버 응답 형식에 맞게 업데이트
+        updateUser({
+          profile_image: data.data.profileImage || data.data.profile_image,
+        });
+
         setProfileData((prev) => ({
           ...prev,
-          profileImage: data.data.profileImage,
+          profileImage: data.data.profileImage || data.data.profile_image,
         }));
+
         setSuccessMessage("프로필 이미지가 업데이트되었습니다.");
-        setTimeout(() => setSuccessMessage(""), 3000);
-      } else {
-        throw new Error(
-          data.message || "프로필 이미지 업로드 중 오류가 발생했습니다."
-        );
       }
     } catch (error) {
-      console.error("프로필 이미지 업로드 오류:", error);
+      console.error("이미지 업로드 오류:", error);
       setError(error.message);
-      setTimeout(() => setError(null), 3000);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // 비밀번호 변경 요청 (비밀번호가 입력된 경우)
-      if (profileData.password) {
-        // 비밀번호 변경 API 호출 (change-password 엔드포인트 사용)
-        const resetResponse = await fetch(
-          "http://localhost:5000/api/users/change-password",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: profileData.email,
-              newPassword: profileData.password,
-            }),
-          }
-        );
-
-        if (!resetResponse.ok) {
-          const errorText = await resetResponse.text();
-          console.error("비밀번호 변경 응답:", errorText);
-          throw new Error("비밀번호 변경 중 오류가 발생했습니다.");
-        }
-
-        const resetData = await resetResponse.json();
-
-        if (resetData.success) {
-          setSuccessMessage("비밀번호가 성공적으로 변경되었습니다.");
-          // 비밀번호 필드 초기화
-          setProfileData((prev) => ({
-            ...prev,
-            password: "",
-          }));
-        } else {
-          throw new Error(
-            resetData.message || "비밀번호 변경 중 오류가 발생했습니다."
-          );
-        }
-      }
-
-      // 이름 및 전화번호 업데이트 로직은 여기에 추가할 수 있습니다
-      // 현재는 비밀번호 변경만 구현
-
-      if (!profileData.password) {
-        setSuccessMessage("프로필이 성공적으로 업데이트되었습니다.");
-      }
-
-      setTimeout(() => setSuccessMessage(""), 3000); // 3초 후 메시지 사라짐
-    } catch (error) {
-      console.error("프로필 업데이트 오류:", error);
-      setError(error.message);
-      setTimeout(() => setError(null), 3000); // 3초 후 오류 메시지 사라짐
     }
   };
 
@@ -203,10 +113,11 @@ const ProfileEditPage = () => {
       )
     ) {
       try {
+        setError(null);
         const response = await fetch(
-          "http://localhost:5000/api/users/delete-user",
+          "http://localhost:5000/api/users/delete", // URL 수정 (서버 라우트에 맞게)
           {
-            method: "DELETE",
+            method: "POST", // DELETE에서 POST로 변경 (서버 컨트롤러에 맞게)
             headers: {
               "Content-Type": "application/json",
             },
@@ -215,9 +126,10 @@ const ProfileEditPage = () => {
         );
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("API 응답 내용:", errorText);
-          throw new Error("회원 탈퇴 처리 중 오류가 발생했습니다.");
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "회원 탈퇴 처리 중 오류가 발생했습니다."
+          );
         }
 
         const data = await response.json();
@@ -226,7 +138,7 @@ const ProfileEditPage = () => {
           alert("회원 탈퇴가 완료되었습니다.");
           // 로컬 스토리지 정리 및 로그인 페이지로 이동
           localStorage.removeItem("userEmail");
-          navigate("/login");
+          window.location.href = "/"; // 전체 페이지 새로고침과 함께 홈으로 이동
         } else {
           throw new Error(
             data.message || "회원 탈퇴 처리 중 오류가 발생했습니다."
@@ -239,14 +151,107 @@ const ProfileEditPage = () => {
     }
   };
 
+  // 비밀번호 변경 함수 추가
+  const handlePasswordChange = async () => {
+    if (!profileData.password) {
+      setError("새 비밀번호를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setError(null);
+      const response = await fetch(
+        "http://localhost:5000/api/users/change-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: profileData.email,
+            newPassword: profileData.password,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "비밀번호 변경 중 오류가 발생했습니다."
+        );
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccessMessage("비밀번호가 성공적으로 변경되었습니다.");
+        // 비밀번호 필드 초기화
+        setProfileData((prev) => ({ ...prev, password: "" }));
+      }
+    } catch (error) {
+      console.error("비밀번호 변경 오류:", error);
+      setError(error.message);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setError(null);
+      // 프로필 정보 업데이트
+      const response = await fetch(
+        "http://localhost:5000/api/users/update-profile",
+        {
+          method: "POST", // PATCH에서 POST로 변경 (서버 컨트롤러에 맞게)
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: profileData.email,
+            name: profileData.name,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "이름 변경 중 오류가 발생했습니다."
+        );
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        updateUser({ user_name: profileData.name });
+        setSuccessMessage("프로필 정보가 업데이트되었습니다.");
+
+        // 비밀번호가 입력되었으면 비밀번호도 변경
+        if (profileData.password) {
+          await handlePasswordChange();
+        }
+      }
+    } catch (error) {
+      console.error("프로필 업데이트 오류:", error);
+      setError(error.message);
+    }
+  };
+
+  // 오류 메시지 타임아웃 처리
+  useEffect(() => {
+    if (error || successMessage) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setSuccessMessage("");
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, successMessage]);
+
   if (loading) {
-    return <div className={styles.loading}>사용자 정보를 불러오는 중...</div>;
+    return <div className={styles.loading}>로딩 중...</div>;
   }
 
   return (
     <div className={styles.pageContainer}>
       <NavBar />
-
       <main className={styles.mainContent}>
         {error && <div className={styles.errorMessage}>{error}</div>}
         {successMessage && (
@@ -254,7 +259,6 @@ const ProfileEditPage = () => {
         )}
 
         <div className={styles.profileHeader}>
-          {/* 프로필 이미지 업로드를 위한 숨겨진 파일 입력 */}
           <input
             type="file"
             ref={fileInputRef}
@@ -262,8 +266,6 @@ const ProfileEditPage = () => {
             accept="image/*"
             style={{ display: "none" }}
           />
-
-          {/* 프로필 아바타 - 클릭 시 파일 선택 창 열림 */}
           <div
             className={styles.profileAvatar}
             onClick={handleAvatarClick}
@@ -279,34 +281,14 @@ const ProfileEditPage = () => {
             }
           >
             {!profileData.profileImage &&
-              (profileData.name
-                ? profileData.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                : "U")}
-            <div className={styles.avatarOverlay}>
-              <span className={styles.avatarHint}>클릭하여 변경</span>
-            </div>
+              (profileData.name ? profileData.name[0] : "U")}
           </div>
-
-          <div className={styles.profileInfo}>
-            <h1 className={styles.profileName}>
-              {profileData.name || "사용자"}
-            </h1>
-            <p className={styles.profileEmail}>{profileData.email}</p>
-            <div className={styles.securityScore}>
-              <span>🛡️</span>
-              <span>보안 점수: 85/100</span>
-            </div>
-          </div>
+          <h1 className={styles.profileName}>{profileData.name || "사용자"}</h1>
+          <p className={styles.profileEmail}>{profileData.email}</p>
         </div>
 
         <div className={styles.editCard}>
-          <h2 className={styles.cardTitle}>
-            <span className={styles.cardIcon}>👤</span>
-            프로필 정보 편집
-          </h2>
+          <h2 className={styles.cardTitle}>프로필 정보 편집</h2>
           <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>이름</label>
@@ -356,7 +338,7 @@ const ProfileEditPage = () => {
               <button
                 type="button"
                 onClick={navigateToDashboard}
-                className={`${styles.button} ${styles.buttonOutline}`}
+                className={`${styles.button} ${styles.secondaryButton}`}
               >
                 취소
               </button>
@@ -364,6 +346,7 @@ const ProfileEditPage = () => {
           </form>
 
           <div className={styles.dangerZone}>
+            <h3 className={styles.dangerTitle}>위험 구역</h3>
             <button
               onClick={handleDeleteAccount}
               className={`${styles.button} ${styles.dangerButton}`}
