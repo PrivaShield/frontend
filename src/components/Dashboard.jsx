@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext"; // UserContext 추가
 import styles from "../styles/Dashboard.module.css";
 import NavBar from "./NavBar";
 import Chart from "chart.js/auto";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useUser(); // UserContext에서 user 가져오기
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const chartRef = useRef(null);
@@ -58,19 +60,15 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // 로그인 상태 확인
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-
-    if (!token || !storedUser) {
+    // 로그인 상태 확인 - useUser 훅 사용
+    if (!user) {
       alert("로그인이 필요합니다.");
       navigate("/login");
       return;
     }
 
     // 사용자 이메일 가져오기
-    const userObj = JSON.parse(storedUser);
-    const userEmail = userObj.email;
+    const userEmail = user.email;
 
     // 대시보드 데이터 가져오기
     fetchDashboardData(userEmail);
@@ -110,7 +108,7 @@ const Dashboard = () => {
         sensitiveInfoChartInstance.current.destroy();
       }
     };
-  }, [navigate]);
+  }, [user, navigate]); // user 상태 추가
 
   // 월간 데이터 가져오기
   // 1. fetchMonthlyData 함수 수정
