@@ -1,40 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
 import styles from "../styles/NavBar.module.css";
 
 const NavBar = ({ scrolled }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, updateUser } = useUser();
+  const [user, setUser] = useState(null);
 
+  // 컴포넌트 마운트 시 로그인 상태 확인
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      updateUser(JSON.parse(storedUser));
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  useEffect(() => {
-    if (location.hash) {
-      setTimeout(() => {
-        const id = location.hash.replace("#", "");
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 100);
-    }
-  }, [location]);
-
-   // 로그아웃 처리
-   const handleLogout = () => {
+  // 로그아웃 처리
+  const handleLogout = () => {
     localStorage.removeItem("token");
-    updateUser(null); // 전역 상태에서 user 제거
+    localStorage.removeItem("user");
+    setUser(null);
     alert("로그아웃 되었습니다.");
-    window.location.href = "/"; 
+    window.location.href = "/"; // 전체 페이지 새로고침과 함께 홈으로 이동
   };
-
 
   // 특정 섹션으로 이동하는 함수
   const handleNavigateToSection = (id) => {
@@ -113,5 +101,6 @@ const NavBar = ({ scrolled }) => {
     </nav>
   );
 };
+
 
 export default NavBar;

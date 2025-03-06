@@ -129,7 +129,9 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
 
     try {
       // API 호출 경로를 skipVerification 여부에 따라 다르게 설정
-      await axios.post("http://localhost:5000/api/auth/reset-password", { 
+      const endpoint = "http://localhost:5000/api/auth/reset-password" ;
+      
+      await axios.post(endpoint, { 
         email,
         newPassword,
       });

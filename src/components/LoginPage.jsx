@@ -8,48 +8,33 @@ import ForgotPasswordModal from "./ForgotPasswordModal"; // 분리된 모달 컴
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
-  
+
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    console.log("로그인 요청 시작");
-    
+    e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
-    
-      console.log("서버 응답:", response.data);
-    
+      const response = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+
       if (!response.data.token) {
         throw new Error("토큰 없음");
       }
-    
-      // 토큰과 사용자 정보를 로컬 스토리지에 저장
+
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      console.log("저장된 토큰:", localStorage.getItem("token"));
-    
+
       alert("로그인 성공!");
-      navigate("/dashboard"); // Add navigation after successful login
+      navigate("/dashboard");
     } catch (error) {
-      console.error("로그인 실패:", error.response?.data || error.message);
       alert(error.response?.data?.message || "로그인 실패!");
     }
   };
 
-  // 회원가입 페이지로 이동
-  const handleStartClick = () => {
-    navigate("/signup"); // "시작하기" 버튼 클릭 시 /signup으로 이동
-  };
-
   return (
     <div className={styles.pageContainer}>
-     <NavBar />
+      <NavBar />
 
       <main className={styles.mainContent}>
-        <div className={styles.animatedCircuit} />
         <div className={styles.loginCard}>
           <h2 className={styles.title}>로그인</h2>
           <p className={styles.subtitle}>PrivaShield에 오신 것을 환영합니다</p>
@@ -84,11 +69,16 @@ const LoginPage = () => {
             <button className={styles.button} type="submit">로그인</button>
           </form>
 
+          {/* 비밀번호 찾기 버튼 추가 */}
+          <button className={styles.forgotPassword} onClick={() => setIsModalOpen(true)}>
+            비밀번호를 잊으셨나요?
+          </button>
+
           <div className={styles.divider}>
             <span className={styles.dividerText}>또는</span>
           </div>
 
-          <button className={`${styles.button} ${styles.signUpButton}`} type="button" onClick={handleStartClick}>
+          <button className={`${styles.button} ${styles.signUpButton}`} type="button" onClick={() => navigate("/signup")}>
             새 계정 만들기
           </button>
         </div>
