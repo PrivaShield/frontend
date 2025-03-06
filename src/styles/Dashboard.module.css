@@ -1,143 +1,578 @@
 .pageContainer {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    color: white;
-  }
-  
-  
-  .userInfo {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    color: #e2e8f0;
-  }
-  
-  .mainContent {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-  
-  .title {
-    font-size: 1.875rem;
-    font-weight: bold;
-    color: white;
-    margin-bottom: 2rem;
-  }
-  
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: white;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #e2e8f0;
+}
+
+.mainContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
   .statsGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  
-  @media (max-width: 768px) {
-    .statsGrid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .statCard {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.5rem;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .statCard::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #2563eb, #1d4ed8);
-  }
-  
-  .statTitle {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    margin-bottom: 0.5rem;
-  }
-  
-  .statValue {
-    font-size: 2rem;
-    font-weight: bold;
-    color: white;
-    margin-bottom: 0.5rem;
-  }
-  
-  .statSubtext {
-    font-size: 0.875rem;
-    color: #64748b;
-  }
-  
-  .dataGrid {
-    display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
   }
-  
-  .dataCard {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.5rem;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+}
+
+.statTitle {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.statSubtext {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.dataGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* 첫 번째 데이터 그리드(월간 데이터)는 전체 너비 사용하도록 명시적으로 지정 */
+.dataGrid:first-child {
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+
+/* 두 번째 데이터 그리드는 2열 레이아웃 유지 */
+.dataGrid:not(:first-child) {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.dataCard {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 데이터 카드 전체 너비 확보 */
+.dataGrid:first-child .dataCard {
+  width: 100%;
+}
+
+.dataCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+}
+
+.dataTitle {
+  font-size: 1.125rem;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.th {
+  text-align: left;
+  padding: 1rem;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.td {
+  padding: 1rem;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 4px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: #e2e8f0;
+  font-size: 1.25rem;
+}
+
+.errorMessage {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #ef4444;
+}
+
+.noDataMessage {
+  color: #94a3b8;
+  text-align: center;
+  padding: 2rem 0;
+  font-style: italic;
+}
+
+/* 비교 섹션 스타일 */
+.comparisonSection {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.comparisonSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: white;
+}
+
+.comparisonGrid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.comparisonCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px 20px;
+  min-width: 150px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.comparisonVs {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #94a3b8;
+}
+
+.comparisonTitle {
+  font-weight: 500;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.comparisonValue {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.comparisonDate {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.changeCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px 20px;
+  min-width: 150px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  margin-top: 10px;
+}
+
+.changeValue {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.changeText {
+  font-size: 1rem;
+}
+
+/* HTML 내용 표시를 위한 스타일 */
+.htmlContentSection {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.htmlContentSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #1d4ed8);
+}
+
+.htmlContent {
+  color: #e2e8f0;
+  padding: 1rem;
+  overflow: auto;
+  max-height: 600px;
+}
+
+/* HTML 내용 스타일 오버라이드 */
+.htmlContent h1,
+.htmlContent h2,
+.htmlContent h3,
+.htmlContent h4,
+.htmlContent h5,
+.htmlContent h6 {
+  color: white;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.htmlContent p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.htmlContent a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.htmlContent a:hover {
+  text-decoration: underline;
+}
+
+.htmlContent table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.htmlContent th,
+.htmlContent td {
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.htmlContent th {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: left;
+}
+
+.htmlContent ul,
+.htmlContent ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.htmlContent li {
+  margin-bottom: 0.5rem;
+}
+
+.htmlContent img {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 4px;
+}
+
+/* 타입 리스트 스타일 - HTML 내용을 대시보드 스타일에 맞게 적용 */
+.typeList {
+  margin-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 10px;
+}
+
+.typeItem {
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  padding: 5px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.typeItem:not(:last-child) {
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+/* Dashboard.module.css에 추가할 체크리스트 관련 스타일 */
+
+/* 차트 컨테이너 */
+.chartContainer {
+  position: relative;
+  height: 150px;
+  width: 150px;
+  margin: 0 auto 15px; /* 상하 여백 유지하면서 좌우 가운데 정렬 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 체크리스트 폼 */
+.checklistForm {
+  display: flex;
+  gap: 8px;
+  margin: 15px 0;
+  width: 100%;
+}
+
+.checklistInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.checklistInput::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.checklistAddButton {
+  background: rgba(59, 130, 246, 0.8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.checklistAddButton:hover {
+  background: rgba(59, 130, 246, 1);
+}
+
+/* 체크리스트 목록 */
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.checklist::-webkit-scrollbar {
+  width: 6px;
+}
+
+.checklist::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.checklist::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.checklistItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.checklistLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1;
+  overflow: hidden;
+}
+
+.checklistCheckbox {
+  accent-color: #3b82f6;
+  width: 16px;
+  height: 16px;
+}
+
+.checklistText {
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checklistTextCompleted {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checklistDeleteButton {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.2rem;
+  padding: 0 8px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.checklistDeleteButton:hover {
+  color: #ff4d4f;
+}
+
+/* 월간 차트 스타일 - Dashboard.module.css에 추가할 내용 */
+
+.monthlyDataContainer {
+  padding: 1rem 0;
+  width: 100%;
+}
+
+.monthlyHeader {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.monthlyTotalCount {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.monthlySubtext {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+/* 월간 차트 컨테이너 스타일 */
+.monthlyChartContainer {
+  height: 250px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 미디어 쿼리 */
+@media (max-width: 768px) {
+  .monthlyTotalCount {
+    font-size: 2rem;
   }
-  
-  .dataCard::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #2563eb, #1d4ed8);
+
+  .monthlyChartContainer {
+    height: 200px;
   }
-  
-  .dataTitle {
-    font-size: 1.125rem;
-    color: white;
-    margin-bottom: 1.5rem;
+}
+
+/* 모바일 화면에서는 세로로 배치 */
+@media (max-width: 768px) {
+  .dataGrid {
+    grid-template-columns: 1fr;
   }
-  
-  .dataTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-  }
-  
-  .th {
-    text-align: left;
-    padding: 1rem;
-    color: #94a3b8;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .td {
-    padding: 1rem;
-    color: #e2e8f0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .progressBar {
-    width: 100%;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  .progress {
-    height: 100%;
-    background: #2563eb;
-    border-radius: 4px;
-  }
+}
+
+/* 일반 차트 컨테이너 (라인/바 차트용) */
+.dataCard .chartContainer {
+  position: relative;
+  height: 250px;
+  width: 100%;
+  margin: 0 auto;
+  display: block; /* flex 해제 */
+}
+
+/* 전체 너비 그리드 */
+.fullWidthGrid {
+  grid-template-columns: 1fr !important;
+  width: 100% !important;
+}
+
+.fullWidthGrid .dataCard {
+  width: 100% !important;
+}
