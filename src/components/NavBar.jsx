@@ -1,25 +1,52 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "../styles/NavBar.module.css";
 
 const NavBar = ({ scrolled }) => {
   const navigate = useNavigate();
-  const { user, updateUser } = useUser();
+  const location = useLocation();
+  const [user, setUser] = useState(null);
+
+  // 컴포넌트 마운트 시 로그인 상태 확인
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   // 로그아웃 처리
   const handleLogout = () => {
     localStorage.removeItem("token");
-    updateUser(null); // 전역 상태에서 user 제거
+    localStorage.removeItem("user");
+    setUser(null);
     alert("로그아웃 되었습니다.");
-    navigate("/"); // 홈으로 이동
+    window.location.href = "/"; // 전체 페이지 새로고침과 함께 홈으로 이동
+  };
+
+  // 특정 섹션으로 이동하는 함수
+  const handleNavigateToSection = (id) => {
+    if (location.pathname !== "/") {
+      navigate(`/#${id}`);
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 200);
+    } else {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
   };
 
   return (
     <nav className={`${styles.navBar} ${scrolled ? styles.scrolled : ""}`}>
       <div
         className={styles.logo}
-        onClick={() => (window.location.href = "#topOfPage")}
+        onClick={() => (window.location.href = "/#topOfPage")}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50">
           <path
@@ -48,10 +75,16 @@ const NavBar = ({ scrolled }) => {
         </svg>
       </div>
       <div className={styles.navLinks}>
-        <a href="#features" className={styles.navLink}>
+        <a
+          className={styles.navLink}
+          onClick={() => handleNavigateToSection("features")}
+        >
           기능
         </a>
-        <a href="#howto" className={styles.navLink}>
+        <a
+          className={styles.navLink}
+          onClick={() => handleNavigateToSection("howto")}
+        >
           이용방법
         </a>
 
@@ -72,7 +105,10 @@ const NavBar = ({ scrolled }) => {
                 {user.user_name}
               </span>
               님
-              <button className={styles.logoutButton} onClick={handleLogout}>
+              <button
+                className={styles.logoutButton}
+                onClick={() => handleLogout()}
+              >
                 로그아웃
               </button>
             </div>

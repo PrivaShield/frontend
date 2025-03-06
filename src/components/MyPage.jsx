@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext"; // 전역 상태 사용
 import styles from "../styles/MyPage.module.css";
 import NavBar from "./NavBar";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ const ProfileEditPage = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef(null);
+  const [email, setEmail] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -318,14 +321,13 @@ const ProfileEditPage = () => {
 
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>비밀번호</label>
-              <input
-                type="password"
-                name="password"
-                value={profileData.password}
-                onChange={handleInputChange}
-                className={styles.formInput}
-                placeholder="새 비밀번호 입력"
-              />
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className={`${styles.button} ${styles.secondaryButton}`}
+              >
+                비밀번호 변경
+              </button>
               <p className={styles.formHelp}>
                 변경하려면 새 비밀번호를 입력하세요
               </p>
@@ -356,6 +358,14 @@ const ProfileEditPage = () => {
           </div>
         </div>
       </main>
+
+      {/* 분리된 비밀번호 찾기 모달 컴포넌트 사용 */}
+      <ForgotPasswordModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        loginEmail={profileData.email}
+        skipVerification={true} // 인증 과정 건너뛰기
+      />
     </div>
   );
 };

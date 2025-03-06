@@ -82,10 +82,6 @@ const SignupPage = () => {
 
         console.log("회원가입 성공:", response.data);
 
-        // 토큰 저장 (필요시)
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-
         // 성공 메시지 표시 (선택사항)
         alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
 
@@ -102,14 +98,6 @@ const SignupPage = () => {
           error.response.data.message
         ) {
           alert(`회원가입 실패: ${error.response.data.message}`);
-
-          // 이메일 중복 에러인 경우 이메일 필드에 에러 표시
-          if (error.response.data.message.includes("이미 가입된 이메일")) {
-            setErrors((prev) => ({
-              ...prev,
-              email: "이미 사용 중인 이메일입니다",
-            }));
-          }
         } else {
           alert("회원가입에 실패했습니다. 다시 시도해주세요.");
         }
