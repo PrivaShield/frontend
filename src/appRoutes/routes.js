@@ -1,18 +1,16 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import LoginPage from "../components/LoginPage";
 import SignupPage from "../components/SignupPage";
 import HeroPage from "../components/HeroPage";
 import Dashboard from "../components/Dashboard";
 import MyPage from "../components/MyPage";
-import ScrollToTop  from "../components/ScrollToTop "
-
-
+import ScrollToTop from "../components/ScrollToTop ";
 
 const AppRoutes = () => {
   return (
     <>
-      <ScrollToTop /> 
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<HeroPage />} />
         <Route path="/login" element={<LoginPage />} />

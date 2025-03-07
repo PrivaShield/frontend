@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext"; // 전역 상태 사용
 import styles from "../styles/MyPage.module.css";
 import NavBar from "./NavBar";
-import ForgotPasswordModal from "./ForgotPasswordModal"; 
-
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
@@ -19,7 +18,6 @@ const ProfileEditPage = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef(null);
-  const [email, setEmail] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -54,47 +52,33 @@ const ProfileEditPage = () => {
       setError(null);
       const formData = new FormData();
       formData.append("email", profileData.email);
-      formData.append("profileImage", file); // 서버에서 기대하는 필드명
+      formData.append("profileImage", file);
 
-      // 올바른 API URL - 언더스코어(_) 사용
       const response = await fetch(
-        "http://localhost:5000/api/users/profile_image",
+        "http://localhost:5000/api/users/update-profile-image",
         {
           method: "POST",
           body: formData,
         }
       );
 
-      // 응답 상태 확인
-      console.log("서버 응답 상태:", response.status);
-
       if (!response.ok) {
-        if (
-          response.headers.get("content-type")?.includes("application/json")
-        ) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || "프로필 이미지 업로드 중 오류가 발생했습니다."
-          );
-        } else {
-          const text = await response.text();
-          console.log("에러 응답 텍스트:", text);
-          throw new Error("프로필 이미지 업로드 중 오류가 발생했습니다.");
-        }
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "프로필 이미지 업로드 중 오류가 발생했습니다."
+        );
       }
 
       const data = await response.json();
-      console.log("받은 데이터:", data);
 
       if (data.success) {
-        // 서버 응답 형식에 맞게 업데이트
         updateUser({
-          profile_image: data.data.profileImage || data.data.profile_image,
+          profile_image: data.data.profileImage,
         });
 
         setProfileData((prev) => ({
           ...prev,
-          profileImage: data.data.profileImage || data.data.profile_image,
+          profileImage: data.data.profileImage,
         }));
 
         setSuccessMessage("프로필 이미지가 업데이트되었습니다.");
@@ -109,7 +93,6 @@ const ProfileEditPage = () => {
     navigate("/dashboard");
   };
 
-  // 회원 탈퇴 처리
   const handleDeleteAccount = async () => {
     if (
       window.confirm(
@@ -118,16 +101,13 @@ const ProfileEditPage = () => {
     ) {
       try {
         setError(null);
-        const response = await fetch(
-          "http://localhost:5000/api/users/delete", // URL 수정 (서버 라우트에 맞게)
-          {
-            method: "POST", // DELETE에서 POST로 변경 (서버 컨트롤러에 맞게)
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email: profileData.email }),
-          }
-        );
+        const response = await fetch("http://localhost:5000/api/users/delete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: profileData.email }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -140,9 +120,8 @@ const ProfileEditPage = () => {
 
         if (data.success) {
           alert("회원 탈퇴가 완료되었습니다.");
-          // 로컬 스토리지 정리 및 로그인 페이지로 이동
           localStorage.removeItem("userEmail");
-          window.location.href = "/"; // 전체 페이지 새로고침과 함께 홈으로 이동
+          window.location.href = "/";
         } else {
           throw new Error(
             data.message || "회원 탈퇴 처리 중 오류가 발생했습니다."
@@ -155,7 +134,6 @@ const ProfileEditPage = () => {
     }
   };
 
-  // 비밀번호 변경 함수 추가
   const handlePasswordChange = async () => {
     if (!profileData.password) {
       setError("새 비밀번호를 입력해주세요.");
@@ -187,7 +165,6 @@ const ProfileEditPage = () => {
 
       if (data.success) {
         setSuccessMessage("비밀번호가 성공적으로 변경되었습니다.");
-        // 비밀번호 필드 초기화
         setProfileData((prev) => ({ ...prev, password: "" }));
       }
     } catch (error) {
@@ -200,11 +177,10 @@ const ProfileEditPage = () => {
     e.preventDefault();
     try {
       setError(null);
-      // 프로필 정보 업데이트
       const response = await fetch(
         "http://localhost:5000/api/users/update-profile",
         {
-          method: "POST", // PATCH에서 POST로 변경 (서버 컨트롤러에 맞게)
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: profileData.email,
@@ -226,7 +202,6 @@ const ProfileEditPage = () => {
         updateUser({ user_name: profileData.name });
         setSuccessMessage("프로필 정보가 업데이트되었습니다.");
 
-        // 비밀번호가 입력되었으면 비밀번호도 변경
         if (profileData.password) {
           await handlePasswordChange();
         }
@@ -237,7 +212,6 @@ const ProfileEditPage = () => {
     }
   };
 
-  // 오류 메시지 타임아웃 처리
   useEffect(() => {
     if (error || successMessage) {
       const timer = setTimeout(() => {
@@ -315,7 +289,7 @@ const ProfileEditPage = () => {
                 onChange={handleInputChange}
                 className={styles.formInput}
                 required
-                disabled // 이메일은 변경 불가
+                disabled
               />
               <p className={styles.formHelp}>이메일은 변경할 수 없습니다</p>
             </div>
@@ -334,7 +308,6 @@ const ProfileEditPage = () => {
               </p>
             </div>
 
-
             <div className={styles.buttonGroup}>
               <button type="submit" className={styles.button}>
                 변경사항 저장
@@ -350,7 +323,7 @@ const ProfileEditPage = () => {
           </form>
 
           <div className={styles.dangerZone}>
-            <h3 className={styles.dangerTitle}>위험 구역</h3>
+            <h3 className={styles.dangerTitle}></h3>
             <button
               onClick={handleDeleteAccount}
               className={`${styles.button} ${styles.dangerButton}`}
@@ -361,15 +334,12 @@ const ProfileEditPage = () => {
         </div>
       </main>
 
-
-      {/* 분리된 비밀번호 찾기 모달 컴포넌트 사용 */}
-      <ForgotPasswordModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ForgotPasswordModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         loginEmail={profileData.email}
-        skipVerification={true} // 인증 과정 건너뛰기
+        skipVerification={true}
       />
-
     </div>
   );
 };

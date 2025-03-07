@@ -9,7 +9,7 @@
   max-width: 100%;
   margin: 0 auto;
   width: 100%;
-  position: relative; 
+  position: relative;
 }
 
 .mainContent {
@@ -118,12 +118,12 @@
 .forgotPassword {
   background: none;
   border: none;
-  text-align: center; 
-  display: block; 
+  text-align: center;
+  display: block;
   margin: 20px auto 0;
-  cursor: pointer; 
-  font-size: 15px; 
-  color: red; 
+  cursor: pointer;
+  font-size: 15px;
+  color: red;
 }
 
 .divider {

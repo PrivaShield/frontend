@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import axios from "axios";
 import styles from "../styles/ForgotPasswordModal.module.css";
 
-const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = false }) => {
+const ForgotPasswordModal = ({
+  isOpen,
+  onClose,
+  loginEmail,
+  skipVerification = false,
+}) => {
   // 상태 변수들
   const [email, setEmail] = useState(loginEmail || "");
   const [message, setMessage] = useState("");
@@ -20,17 +25,20 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
       setMessage("이메일을 입력해주세요.");
       return;
     }
-    
+
     // 로딩 표시 시작
     setIsLoading(true);
     setMessage("인증 코드를 전송 중입니다...");
-    
+
     // 즉시 verify 단계로 전환 (UI 측면에서의 속도 향상)
     setStep("verify");
-    
+
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/verify-and-send", { email });
-      
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/verify-and-send",
+        { email }
+      );
+
       if (response.data.success) {
         setVerificationCode(response.data.verificationCode);
         setMessage("인증 코드가 이메일로 전송되었습니다.");
@@ -68,14 +76,17 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
   const formatTimer = () => {
     const minutes = Math.floor(timer / 60);
     const seconds = timer % 60;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
   // 인증 코드 재전송
   const handleResendCode = async () => {
     try {
-      const verifyResponse = await axios.post("http://localhost:5000/api/auth/send-verification-code", { email });
-      
+      const verifyResponse = await axios.post(
+        "http://localhost:5000/api/auth/send-verification-code",
+        { email }
+      );
+
       setVerificationCode(verifyResponse.data.verificationCode);
       setMessage("새로운 인증 코드가 전송되었습니다.");
       setTimer(300);
@@ -129,21 +140,24 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
 
     try {
       // API 호출 경로를 skipVerification 여부에 따라 다르게 설정
-      const endpoint = "http://localhost:5000/api/auth/reset-password" ;
-      
-      await axios.post(endpoint, { 
+      const endpoint = "http://localhost:5000/api/auth/reset-password";
+
+      await axios.post(endpoint, {
         email,
         newPassword,
       });
 
       setMessage("비밀번호가 성공적으로 재설정되었습니다.");
-      
+
       // 2초 후 모달 닫기
       setTimeout(() => {
         handleClose();
       }, 2000);
     } catch (error) {
-      setMessage(error.response?.data?.message || "비밀번호 재설정 중 오류가 발생했습니다.");
+      setMessage(
+        error.response?.data?.message ||
+          "비밀번호 재설정 중 오류가 발생했습니다."
+      );
     }
   };
 
@@ -170,7 +184,7 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <h2 className={styles.modalTitle}>{modalTitle}</h2>
-        
+
         {/* 이메일 입력 단계 - 로그인 상태에서는 표시되지 않음 */}
         {step === "email" && !skipVerification && (
           <>
@@ -188,7 +202,7 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
             </button>
           </>
         )}
-        
+
         {isLoading && (
           <div className={styles.loadingIndicator}>
             <span>처리 중...</span>
@@ -219,8 +233,8 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
               <button className={styles.button} onClick={handleVerifyCode}>
                 인증 확인
               </button>
-              <button 
-                className={styles.resendButton} 
+              <button
+                className={styles.resendButton}
                 onClick={handleResendCode}
                 disabled={isTimerActive}
               >
@@ -251,13 +265,13 @@ const ForgotPasswordModal = ({ isOpen, onClose, loginEmail, skipVerification = f
               required
             />
             <button className={styles.button} onClick={handleResetPassword}>
-              비밀번호 {skipVerification ? '변경' : '재설정'}
+              비밀번호 {skipVerification ? "변경" : "재설정"}
             </button>
           </>
         )}
 
         {message && <p className={styles.message}>{message}</p>}
-        
+
         <button className={styles.closeButton} onClick={handleClose}>
           닫기
         </button>

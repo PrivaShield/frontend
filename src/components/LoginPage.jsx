@@ -1,27 +1,39 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import styles from "../styles/LoginPage.module.css"; // 기존 스타일 경로 유지
+import { useUser } from "../contexts/UserContext"; // UserContext 추가
+import styles from "../styles/LoginPage.module.css";
 import NavBar from "./NavBar";
-import ForgotPasswordModal from "./ForgotPasswordModal"; // 분리된 모달 컴포넌트 import
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { updateUser } = useUser(); // UserContext의 updateUser 사용
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        { email, password }
+      );
 
       if (!response.data.token) {
         throw new Error("토큰 없음");
       }
 
+      // 토큰 저장
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      // 전역 사용자 상태 업데이트
+      updateUser({
+        email: response.data.user.email,
+        user_name: response.data.user.user_name,
+        profile_image: response.data.user.profile_image,
+      });
 
       alert("로그인 성공!");
       navigate("/dashboard");
@@ -41,7 +53,9 @@ const LoginPage = () => {
 
           <form className={styles.form} onSubmit={handleLogin}>
             <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="email">이메일</label>
+              <label className={styles.label} htmlFor="email">
+                이메일
+              </label>
               <input
                 className={styles.input}
                 id="email"
@@ -54,7 +68,9 @@ const LoginPage = () => {
             </div>
 
             <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="password">비밀번호</label>
+              <label className={styles.label} htmlFor="password">
+                비밀번호
+              </label>
               <input
                 className={styles.input}
                 id="password"
@@ -66,11 +82,15 @@ const LoginPage = () => {
               />
             </div>
 
-            <button className={styles.button} type="submit">로그인</button>
+            <button className={styles.button} type="submit">
+              로그인
+            </button>
           </form>
 
-          {/* 비밀번호 찾기 버튼 추가 */}
-          <button className={styles.forgotPassword} onClick={() => setIsModalOpen(true)}>
+          <button
+            className={styles.forgotPassword}
+            onClick={() => setIsModalOpen(true)}
+          >
             비밀번호를 잊으셨나요?
           </button>
 
@@ -78,16 +98,19 @@ const LoginPage = () => {
             <span className={styles.dividerText}>또는</span>
           </div>
 
-          <button className={`${styles.button} ${styles.signUpButton}`} type="button" onClick={() => navigate("/signup")}>
+          <button
+            className={`${styles.button} ${styles.signUpButton}`}
+            type="button"
+            onClick={() => navigate("/signup")}
+          >
             새 계정 만들기
           </button>
         </div>
       </main>
 
-      {/* 분리된 비밀번호 찾기 모달 컴포넌트 사용 */}
-      <ForgotPasswordModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ForgotPasswordModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         loginEmail={email}
       />
     </div>

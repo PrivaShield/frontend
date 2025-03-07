@@ -3,7 +3,8 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 body {
@@ -28,8 +29,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    linear-gradient(to right, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+  background-image: linear-gradient(
+      to right,
+      rgba(37, 99, 235, 0.05) 1px,
+      transparent 1px
+    ),
     linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
   background-size: 30px 30px;
   z-index: 0;
@@ -89,7 +93,7 @@ body {
 }
 
 .navLink::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 0;
   height: 2px;
@@ -187,7 +191,7 @@ body {
 }
 
 .highlight::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 5px;
   left: 0;
@@ -273,7 +277,12 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.7s;
 }
 
@@ -321,7 +330,11 @@ body {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0) 70%);
+  background: radial-gradient(
+    circle,
+    rgba(37, 99, 235, 0.2) 0%,
+    rgba(37, 99, 235, 0) 70%
+  );
   animation: pulse 3s infinite;
 }
 
@@ -422,7 +435,7 @@ body {
 }
 
 .titleHighlight::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 5px;
   left: 0;
@@ -612,6 +625,18 @@ body {
   margin: 0 auto;
 }
 
+.code-container {
+  max-width: 100%;
+  max-height: 200px; /* 원하는 높이로 설정 */
+  overflow: auto; /* 내용이 넘칠 경우 스크롤 추가 */
+  white-space: pre-wrap; /* 코드에서 줄바꿈이 있을 경우 그에 맞춰 처리 */
+  padding: 10px;
+  border-radius: 5px;
+  font-family: monospace; /* 코드에 적합한 폰트 */
+  font-size: 14px; /* 코드 크기 설정 */
+  word-wrap: break-word; /* 긴 코드가 영역을 벗어나지 않도록 처리 */
+}
+
 .stepCard {
   display: flex;
   gap: 2rem;
@@ -710,8 +735,8 @@ body {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background-color: rgba(37, 99, 235, 0.1);
-  color: #94a3b8;
+  background-color: rgb(37, 100, 235);
+  color: #1b1f24;
   padding: 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -720,8 +745,8 @@ body {
 }
 
 .codeCopy:hover {
-  background-color: rgba(37, 99, 235, 0.2);
-  color: #e2e8f0;
+  background-color: rgb(199, 208, 228);
+  color: #3d444e;
 }
 
 .codeCopy svg {
@@ -893,7 +918,6 @@ body {
   color: #64748b;
 }
 
-
 /* Animations */
 @keyframes fadeInUp {
   from {
@@ -950,7 +974,11 @@ body {
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0) translateX(-50%);
   }
   40% {
@@ -967,17 +995,18 @@ body {
     padding: 3rem 2rem;
     gap: 2rem;
   }
-  
+
   .title {
     font-size: 3rem;
   }
-  
+
   .demoContainer {
     flex-direction: column;
     gap: 3rem;
   }
-  
-  .demoAnimation, .demoText {
+
+  .demoAnimation,
+  .demoText {
     max-width: 100%;
   }
 }
@@ -988,37 +1017,37 @@ body {
     text-align: center;
     padding: 2rem 1rem;
   }
-  
+
   .title {
     font-size: 2.5rem;
   }
-  
+
   .securityBadge {
     justify-content: center;
   }
-  
+
   .ctaButton {
     display: block;
     margin: 0 auto;
   }
-  
+
   .featuresGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .stepCard {
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
     text-align: center;
   }
-  
+
   .footerContainer {
     grid-template-columns: 1fr;
     gap: 2rem;
     text-align: center;
   }
-  
+
   .socialLinks {
     justify-content: center;
   }
@@ -1030,20 +1059,20 @@ body {
     gap: 1rem;
     padding: 1rem;
   }
-  
+
   .navLinks {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .title {
     font-size: 2rem;
   }
-  
+
   .tag {
     font-size: 0.75rem;
   }
-  
+
   .securityBadge {
     padding: 0.75rem;
     flex-direction: column;
