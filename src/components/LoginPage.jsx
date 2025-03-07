@@ -17,7 +17,7 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://your-heroku-app.herokuapp.com/api/auth/login",
+        "https://privashield-d6fad9e03984.herokuapp.com/api/auth/login",
         { email, password },
         {
           withCredentials: true, // 이 부분 추가

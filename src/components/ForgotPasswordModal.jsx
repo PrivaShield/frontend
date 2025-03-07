@@ -35,7 +35,7 @@ const ForgotPasswordModal = ({
 
     try {
       const response = await axios.post(
-        "https://your-heroku-app.herokuapp.com/api/auth/verify-and-send",
+        "https://privashield-d6fad9e03984.herokuapp.com/api/auth/verify-and-send",
         { email },
         {
           withCredentials: true, // 이 부분 추가
@@ -86,7 +86,7 @@ const ForgotPasswordModal = ({
   const handleResendCode = async () => {
     try {
       const verifyResponse = await axios.post(
-        "https://your-heroku-app.herokuapp.com/api/auth/send-verification-code",
+        "https://privashield-d6fad9e03984.herokuapp.com/api/auth/send-verification-code",
         { email },
         {
           withCredentials: true, // 이 부분 추가
@@ -147,7 +147,7 @@ const ForgotPasswordModal = ({
     try {
       // API 호출 경로를 skipVerification 여부에 따라 다르게 설정
       const endpoint =
-        "https://your-heroku-app.herokuapp.com/api/auth/reset-password";
+        "https://privashield-d6fad9e03984.herokuapp.com/api/auth/reset-password";
 
       await axios.post(
         endpoint,

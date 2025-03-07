@@ -55,7 +55,7 @@ const ProfileEditPage = () => {
       formData.append("profileImage", file);
 
       const response = await fetch(
-        "https://your-heroku-app.herokuapp.com/api/users/update-profile-image",
+        "https://privashield-d6fad9e03984.herokuapp.com/api/users/update-profile-image",
         {
           method: "POST",
           credentials: "include", // 이 부분 추가
@@ -103,7 +103,7 @@ const ProfileEditPage = () => {
       try {
         setError(null);
         const response = await fetch(
-          "https://your-heroku-app.herokuapp.com/api/users/delete",
+          "https://privashield-d6fad9e03984.herokuapp.com/api/users/delete",
           {
             method: "POST",
             credentials: "include", // 이 부분 추가
@@ -148,7 +148,7 @@ const ProfileEditPage = () => {
     try {
       setError(null);
       const response = await fetch(
-        "https://your-heroku-app.herokuapp.com/api/users/change-password",
+        "https://privashield-d6fad9e03984.herokuapp.com/api/users/change-password",
         {
           method: "POST",
           credentials: "include", // 이 부분 추가
@@ -184,7 +184,7 @@ const ProfileEditPage = () => {
     try {
       setError(null);
       const response = await fetch(
-        "https://your-heroku-app.herokuapp.com/api/users/update-profile",
+        "https://privashield-d6fad9e03984.herokuapp.com/api/users/update-profile",
         {
           method: "POST",
           credentials: "include", // 이 부분 추가
@@ -257,7 +257,7 @@ const ProfileEditPage = () => {
             style={
               profileData.profileImage
                 ? {
-                    backgroundImage: `url(https://your-heroku-app.herokuapp.com${profileData.profileImage})`,
+                    backgroundImage: `url(https://privashield-d6fad9e03984.herokuapp.com${profileData.profileImage})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     cursor: "pointer",
