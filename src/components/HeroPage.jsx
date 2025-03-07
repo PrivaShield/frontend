@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "../styles/HeroPage.module.css";
 import NavBar from "./NavBar";
 
@@ -46,7 +46,6 @@ const FeatureCard = ({ icon, title, description, delay }) => {
 // Main Hero Page Component
 const HeroPage = () => {
   const navigate = useNavigate();
-  const location = useLocation(); 
   const [scrolled, setScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
   const [user, setUser] = useState(null);
