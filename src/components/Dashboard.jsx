@@ -103,7 +103,10 @@ const Dashboard = () => {
         const previousLeaksResponse = await fetch(
           `https://your-heroku-app.herokuapp.com/api/dashboard/previous-leaks?email=${encodeURIComponent(
             email
-          )}`
+          )}`,
+          {
+            credentials: "include", // 이 부분 추가
+          }
         );
 
         if (!previousLeaksResponse.ok) {
@@ -119,7 +122,10 @@ const Dashboard = () => {
         const currentLeaksResponse = await fetch(
           `https://your-heroku-app.herokuapp.com/api/dashboard/current-leaks?email=${encodeURIComponent(
             email
-          )}`
+          )}`,
+          {
+            credentials: "include", // 이 부분 추가
+          }
         );
 
         if (!currentLeaksResponse.ok) {
@@ -192,7 +198,10 @@ const Dashboard = () => {
       const response = await fetch(
         `https://your-heroku-app.herokuapp.com/api/dashboard/summary?email=${encodeURIComponent(
           email
-        )}`
+        )}`,
+        {
+          credentials: "include", // 이 부분 추가
+        }
       );
 
       if (!response.ok) {
@@ -239,7 +248,10 @@ const Dashboard = () => {
       const response = await fetch(
         `https://your-heroku-app.herokuapp.com/api/dashboard/monthly-data?email=${encodeURIComponent(
           email
-        )}`
+        )}`,
+        {
+          credentials: "include", // 이 부분 추가
+        }
       );
 
       if (!response.ok) {
@@ -272,7 +284,10 @@ const Dashboard = () => {
       const response = await fetch(
         `https://your-heroku-app.herokuapp.com/api/dashboard/monthly-risk?email=${encodeURIComponent(
           email
-        )}`
+        )}`,
+        {
+          credentials: "include", // 이 부분 추가
+        }
       );
 
       if (!response.ok) {
@@ -299,7 +314,10 @@ const Dashboard = () => {
       const response = await fetch(
         `https://your-heroku-app.herokuapp.com/api/dashboard/sensitive-info?email=${encodeURIComponent(
           email
-        )}`
+        )}`,
+        {
+          credentials: "include", // 이 부분 추가
+        }
       );
 
       if (!response.ok) {

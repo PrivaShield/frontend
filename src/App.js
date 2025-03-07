@@ -1,6 +1,6 @@
-import React from 'react';
-import AppRoutes from './appRoutes/routes'
-import { BrowserRouter } from 'react-router-dom';
+import React from "react";
+import AppRoutes from "./appRoutes/routes";
+import { BrowserRouter } from "react-router-dom";
 import { UserProvider } from "./contexts/UserContext"; // UserProvider 추가
 
 function App() {

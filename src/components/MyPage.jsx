@@ -58,6 +58,7 @@ const ProfileEditPage = () => {
         "https://your-heroku-app.herokuapp.com/api/users/update-profile-image",
         {
           method: "POST",
+          credentials: "include", // 이 부분 추가
           body: formData,
         }
       );
@@ -105,6 +106,7 @@ const ProfileEditPage = () => {
           "https://your-heroku-app.herokuapp.com/api/users/delete",
           {
             method: "POST",
+            credentials: "include", // 이 부분 추가
             headers: {
               "Content-Type": "application/json",
             },
@@ -149,6 +151,7 @@ const ProfileEditPage = () => {
         "https://your-heroku-app.herokuapp.com/api/users/change-password",
         {
           method: "POST",
+          credentials: "include", // 이 부분 추가
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: profileData.email,
@@ -184,6 +187,7 @@ const ProfileEditPage = () => {
         "https://your-heroku-app.herokuapp.com/api/users/update-profile",
         {
           method: "POST",
+          credentials: "include", // 이 부분 추가
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: profileData.email,

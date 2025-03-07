@@ -18,7 +18,10 @@ const LoginPage = () => {
     try {
       const response = await axios.post(
         "https://your-heroku-app.herokuapp.com/api/auth/login",
-        { email, password }
+        { email, password },
+        {
+          withCredentials: true, // 이 부분 추가
+        }
       );
 
       if (!response.data.token) {

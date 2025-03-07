@@ -36,7 +36,10 @@ const ForgotPasswordModal = ({
     try {
       const response = await axios.post(
         "https://your-heroku-app.herokuapp.com/api/auth/verify-and-send",
-        { email }
+        { email },
+        {
+          withCredentials: true, // 이 부분 추가
+        }
       );
 
       if (response.data.success) {
@@ -84,7 +87,10 @@ const ForgotPasswordModal = ({
     try {
       const verifyResponse = await axios.post(
         "https://your-heroku-app.herokuapp.com/api/auth/send-verification-code",
-        { email }
+        { email },
+        {
+          withCredentials: true, // 이 부분 추가
+        }
       );
 
       setVerificationCode(verifyResponse.data.verificationCode);
@@ -143,10 +149,16 @@ const ForgotPasswordModal = ({
       const endpoint =
         "https://your-heroku-app.herokuapp.com/api/auth/reset-password";
 
-      await axios.post(endpoint, {
-        email,
-        newPassword,
-      });
+      await axios.post(
+        endpoint,
+        {
+          email,
+          newPassword,
+        },
+        {
+          withCredentials: true, // 이 부분 추가
+        }
+      );
 
       setMessage("비밀번호가 성공적으로 재설정되었습니다.");
 

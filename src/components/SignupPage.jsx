@@ -77,6 +77,9 @@ const SignupPage = () => {
             name: formData.name,
             email: formData.email,
             password: formData.password,
+          },
+          {
+            withCredentials: true, // 이 부분 추가
           }
         );
 
