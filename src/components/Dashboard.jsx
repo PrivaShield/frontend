@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext"; // UserContext 추가
 import styles from "../styles/Dashboard.module.css";
 import NavBar from "./NavBar";
-import Chart from "chart.js/auto";
+import Chart from "chart.js";
 
 const Dashboard = () => {
   const navigate = useNavigate();
