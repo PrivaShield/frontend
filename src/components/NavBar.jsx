@@ -5,36 +5,58 @@ import styles from "../styles/NavBar.module.css";
 
 const NavBar = ({ scrolled }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useUser(); // 전역 사용자 컨텍스트 사용
 
-  const handleStartClick2 = (features) => {
-    navigate(`/?scrollTo=${features}`);
+  // 로고 클릭 시 페이지 최상단 이동
+  const handleLogoClick = () => {
+    if (location.pathname !== "/") {
+      navigate("/#topOfPage");
+      setTimeout(() => {
+        const element = document.getElementById("topOfPage");
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 200);
+    } else {
+      const element = document.getElementById("topOfPage");
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
   };
 
-  const handleStartClick = () => {
-    navigate("/login");
+  // 특정 섹션으로 이동
+  const handleNavigateToSection = (id) => {
+    if (location.pathname !== "/") {
+      navigate(`/#${id}`);
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 200);
+    } else {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
   };
 
-  const handleMyPageClick = () => {
-    navigate("/mypage");
-  };
-
-  const handleDashboardClick = () => {
-    navigate("/dashboard");
-  };
+  const handleLoginClick = () => navigate("/login");
+  const handleMyPageClick = () => navigate("/mypage");
+  const handleDashboardClick = () => navigate("/dashboard");
 
   const handleLogout = () => {
-    logout(); // 컨텍스트의 로그아웃 메서드 사용
+    logout();
     alert("로그아웃 되었습니다.");
-    window.location.href = "/"; // 홈페이지로 새로고침
+    window.location.href = "/";
   };
 
   return (
     <nav className={`${styles.navBar} ${scrolled ? styles.scrolled : ""}`}>
-      <div
-        className={styles.logo}
-        onClick={() => (window.location.href = "#topOfPage")}
-      >
+      <div className={styles.logo} onClick={handleLogoClick}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50">
           <path
             d="M40 10 L50 15 L50 35 L40 40 L30 35 L30 15 Z"
@@ -65,14 +87,14 @@ const NavBar = ({ scrolled }) => {
         <a
           href="#features"
           className={styles.navLink}
-          onClick={() => handleStartClick2("features")}
+          onClick={() => handleNavigateToSection("features")}
         >
           기능
         </a>
         <a
           href="#howto"
           className={styles.navLink}
-          onClick={() => handleStartClick2("howto")}
+          onClick={() => handleNavigateToSection("howto")}
         >
           이용방법
         </a>
@@ -93,7 +115,7 @@ const NavBar = ({ scrolled }) => {
             </div>
           </>
         ) : (
-          <button className={styles.loginButton} onClick={handleStartClick}>
+          <button className={styles.loginButton} onClick={handleLoginClick}>
             로그인
           </button>
         )}

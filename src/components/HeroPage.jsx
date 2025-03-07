@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "../styles/HeroPage.module.css";
 import NavBar from "./NavBar";
 
@@ -43,7 +43,6 @@ const FeatureCard = ({ icon, title, description, delay }) => {
 // Main Hero Page Component
 const HeroPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [copied, setCopied] = useState(false);
   const [user, setUser] = useState(null);
@@ -159,8 +158,7 @@ const HeroPage = () => {
               </div>
               <p className={styles.badgeText}>
                 <strong>100% 안심 : </strong> PrivaShield는 분석한 개인 민감
-                정보를 절대 저장하지 않습니다. 대시보드 통계를 위한 카테고리
-                정보만을 수집합니다.
+                정보를 절대 저장하지 않습니다.
               </p>
             </div>
             <button className={styles.ctaButton} onClick={handleStartClick}>
