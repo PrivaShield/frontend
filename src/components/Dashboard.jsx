@@ -23,6 +23,9 @@ const Dashboard = () => {
   const sensitiveInfoChartRef = useRef(null);
   const sensitiveInfoChartInstance = useRef(null);
 
+  // API 호출 상태 관리
+  const [dataFetched, setDataFetched] = useState(false);
+
   // 월간 데이터 상태
   const [monthlyData, setMonthlyData] = useState({
     totalCount: 0,
@@ -60,7 +63,7 @@ const Dashboard = () => {
   });
 
   // 안전 점수 계산 함수
-  const calculateSafetyScore = (leakData) => {
+  const calculateSafetyScore = useCallback((leakData) => {
     const sensitivityWeights = { 낮음: 0.1, 중간: 0.3, 높음: 0.7 };
 
     // 카테고리별 유출 개수 집계
@@ -90,15 +93,12 @@ const Dashboard = () => {
     const S = 100 - weightedSum * logTerm;
 
     return Math.min(100, Math.max(0, Math.floor(S)));
-  };
+  }, []);
 
   // 안전 점수 데이터 가져오기
   const fetchSafetyData = useCallback(
     async (email) => {
       try {
-        // 실제로는 API 요청을 보내서 데이터를 가져와야 함
-        // 여기서는 대시보드 데이터로 계산
-
         // 이전 유출 기록 (어제까지의 데이터)
         const previousLeaksResponse = await fetch(
           `http://localhost:5000/api/dashboard/previous-leaks?email=${encodeURIComponent(
@@ -168,74 +168,73 @@ const Dashboard = () => {
       } catch (error) {
         console.error("안전 점수 데이터 로드 오류:", error);
         // 오류 발생 시 기본 데이터
-        setSafetyData({
-          currentScore: dashboardData.safetyScore,
-          previousScore:
-            dashboardData.safetyScore -
-            parseInt(dashboardData.monthly.changePercent),
-          scoreDifference: parseInt(dashboardData.monthly.changePercent),
-          percentile: dashboardData.globalPercentile,
+        setSafetyData((prev) => {
+          // 이미 값이 설정되어 있다면 변경하지 않음
+          if (prev.currentScore > 0) return prev;
+
+          return {
+            currentScore: dashboardData.safetyScore,
+            previousScore:
+              dashboardData.safetyScore -
+              parseInt(dashboardData.monthly.changePercent),
+            scoreDifference: parseInt(dashboardData.monthly.changePercent),
+            percentile: dashboardData.globalPercentile,
+          };
         });
       }
     },
-    [dashboardData]
+    [calculateSafetyScore, dashboardData]
   );
 
-  useEffect(() => {
-    // 로그인 상태 확인 - useUser 훅 사용
-    if (!user) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-      return;
+  // 대시보드 데이터 가져오기
+  const fetchDashboardData = useCallback(async (email) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/dashboard/summary?email=${encodeURIComponent(
+          email
+        )}`
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API 응답:", errorText);
+        throw new Error("대시보드 데이터를 불러오는데 실패했습니다.");
+      }
+
+      const data = await response.json();
+      console.log("받은 대시보드 데이터:", data);
+
+      if (data.success) {
+        setDashboardData(data.data);
+      } else {
+        throw new Error(data.message || "데이터 로드 실패");
+      }
+    } catch (error) {
+      console.error("데이터 로드 오류:", error);
+      setError(error.message);
+
+      // 오류 발생 시 기본 데이터 설정
+      setDashboardData({
+        today: {
+          detectedCount: 0,
+          sensitiveTypes: [],
+          lastExecutionDate: null,
+          lastExecutionCount: 0,
+          changeRate: 0,
+        },
+        monthly: {
+          thisMonth: 0,
+          lastMonth: 0,
+          changePercent: 0,
+        },
+        safetyScore: 100,
+        globalPercentile: 15,
+      });
     }
-
-    // 사용자 이메일 가져오기
-    const userEmail = user.email;
-
-    // 대시보드 데이터 가져오기
-    fetchDashboardData(userEmail);
-
-    // 안전 점수 데이터 가져오기
-    fetchSafetyData(userEmail);
-
-    // 체크리스트 데이터 로드 (localStorage)
-    loadChecklistData();
-
-    // 월간 데이터 가져오기
-    fetchMonthlyData(userEmail);
-
-    // 월간 위험 감지 데이터 가져오기
-    fetchMonthlyRiskData(userEmail);
-
-    // 유형별 민감 정보 데이터 가져오기
-    fetchSensitiveInfoData(userEmail);
-
-    return () => {
-      // 컴포넌트 언마운트 시 차트 정리
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
-      if (checklistChartInstance.current) {
-        checklistChartInstance.current.destroy();
-      }
-      if (monthlyChartInstance.current) {
-        monthlyChartInstance.current.destroy();
-      }
-
-      if (monthlyRiskChartInstance.current) {
-        monthlyRiskChartInstance.current.destroy();
-      }
-
-      if (sensitiveInfoChartInstance.current) {
-        sensitiveInfoChartInstance.current.destroy();
-      }
-    };
-  }, [user, navigate, fetchSafetyData]); // fetchSafetyData 의존성 추가
+  }, []);
 
   // 월간 데이터 가져오기
-  // 1. fetchMonthlyData 함수 수정
-  // fetchMonthlyData 함수 수정
-  const fetchMonthlyData = async (email) => {
+  const fetchMonthlyData = useCallback(async (email) => {
     try {
       const response = await fetch(
         `http://localhost:5000/api/dashboard/monthly-data?email=${encodeURIComponent(
@@ -251,7 +250,6 @@ const Dashboard = () => {
       console.log("월간 데이터 API 응답:", data);
 
       if (data.success) {
-        // API 응답 데이터 형식에 맞게 조정 (한 번만 호출)
         setMonthlyData({
           totalCount: data.data.totalCount || 0,
           dateData: data.data.dailyData || [],
@@ -266,23 +264,160 @@ const Dashboard = () => {
         dateData: [],
       });
     }
-  };
+  }, []);
 
-  // 2. 월간 차트 생성 부분 수정
+  // 월간 위험 감지 데이터 가져오기 함수
+  const fetchMonthlyRiskData = useCallback(async (email) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/dashboard/monthly-risk?email=${encodeURIComponent(
+          email
+        )}`
+      );
+
+      if (!response.ok) {
+        throw new Error("월간 위험 감지 데이터를 가져오는데 실패했습니다.");
+      }
+
+      const data = await response.json();
+      console.log("월간 위험 감지 API 응답:", data);
+
+      if (data.success) {
+        setMonthlyRiskData(data.data || []);
+      } else {
+        throw new Error(data.message || "월간 위험 감지 데이터 로드 실패");
+      }
+    } catch (error) {
+      console.error("월간 위험 감지 데이터 로드 오류:", error);
+      setMonthlyRiskData([]);
+    }
+  }, []);
+
+  // 유형별 민감 정보 데이터 가져오기 함수
+  const fetchSensitiveInfoData = useCallback(async (email) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/dashboard/sensitive-info?email=${encodeURIComponent(
+          email
+        )}`
+      );
+
+      if (!response.ok) {
+        throw new Error("유형별 민감 정보를 가져오는데 실패했습니다.");
+      }
+
+      const data = await response.json();
+      console.log("유형별 민감 정보 API 응답:", data);
+
+      if (data.success) {
+        setSensitiveInfoData(data.data || []);
+      } else {
+        throw new Error(data.message || "유형별 민감 정보 로드 실패");
+      }
+    } catch (error) {
+      console.error("유형별 민감 정보 로드 오류:", error);
+      setSensitiveInfoData([]);
+    }
+  }, []);
+
+  // 체크리스트 데이터 로드
+  const loadChecklistData = useCallback(() => {
+    try {
+      const savedData = localStorage.getItem("securityChecklist");
+      if (savedData) {
+        setChecklistData(JSON.parse(savedData));
+      }
+    } catch (error) {
+      console.error("체크리스트 데이터 로드 오류:", error);
+    }
+  }, []);
+
+  // 주요 데이터 로딩
+  useEffect(() => {
+    // 로그인 상태 확인
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
+    // 이미 데이터를 가져왔다면 중복 요청하지 않음
+    if (dataFetched) return;
+
+    const userEmail = user.email;
+    setIsLoading(true);
+
+    const loadAllData = async () => {
+      try {
+        // 대시보드 데이터 먼저 로드
+        await fetchDashboardData(userEmail);
+
+        // 병렬로 나머지 데이터 로드
+        await Promise.all([
+          fetchSafetyData(userEmail),
+          fetchMonthlyData(userEmail),
+          fetchMonthlyRiskData(userEmail),
+          fetchSensitiveInfoData(userEmail),
+        ]);
+
+        // 로컬에서 체크리스트 데이터 로드
+        loadChecklistData();
+
+        // 데이터 로딩 완료
+        setDataFetched(true);
+      } catch (error) {
+        console.error("데이터 로딩 오류:", error);
+        setError("데이터를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAllData();
+
+    return () => {
+      // 컴포넌트 언마운트 시 차트 정리
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+      if (checklistChartInstance.current) {
+        checklistChartInstance.current.destroy();
+      }
+      if (monthlyChartInstance.current) {
+        monthlyChartInstance.current.destroy();
+      }
+      if (monthlyRiskChartInstance.current) {
+        monthlyRiskChartInstance.current.destroy();
+      }
+      if (sensitiveInfoChartInstance.current) {
+        sensitiveInfoChartInstance.current.destroy();
+      }
+    };
+  }, [
+    user,
+    navigate,
+    dataFetched,
+    fetchDashboardData,
+    fetchSafetyData,
+    fetchMonthlyData,
+    fetchMonthlyRiskData,
+    fetchSensitiveInfoData,
+    loadChecklistData,
+  ]);
+
   // 월간 차트 생성 및 업데이트
   useEffect(() => {
     // 로드 중이거나 오류가 있다면 차트를 그리지 않음
-    if (isLoading || error) return;
+    if (
+      isLoading ||
+      error ||
+      !monthlyChartRef.current ||
+      !monthlyData.dateData.length
+    )
+      return;
 
-    // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 차트 생성
-    const timer = setTimeout(() => {
-      if (!monthlyChartRef.current) {
-        console.log("차트 ref가 없습니다 - 지연 후 체크");
-        return;
-      }
-
-      console.log("월간 차트 useEffect 실행:", monthlyData);
-
+    // 차트 새로 생성
+    const updateChart = () => {
       // 기존 차트가 있으면 파괴
       if (monthlyChartInstance.current) {
         monthlyChartInstance.current.destroy();
@@ -292,12 +427,9 @@ const Dashboard = () => {
       const labels = monthlyData.dateData.map((item) => item.date);
       const values = monthlyData.dateData.map((item) => item.detection_count);
 
-      console.log("차트 데이터:", { labels, values });
-
       // 차트 생성
       const ctx = monthlyChartRef.current.getContext("2d");
       monthlyChartInstance.current = new Chart(ctx, {
-        // 기존 차트 옵션 유지
         type: "bar",
         data: {
           labels: labels,
@@ -339,20 +471,25 @@ const Dashboard = () => {
           },
         },
       });
-    }, 100); // 100ms 지연
+    };
 
+    // 100ms 지연 후 차트 생성
+    const timer = setTimeout(updateChart, 100);
     return () => clearTimeout(timer);
   }, [monthlyData, isLoading, error]);
 
   // 월간 위험 감지 차트 생성 및 업데이트
   useEffect(() => {
-    if (isLoading || error || !monthlyRiskChartRef.current) return;
+    if (
+      isLoading ||
+      error ||
+      !monthlyRiskChartRef.current ||
+      !monthlyRiskData.length
+    )
+      return;
 
-    // 데이터가 비어있는지 확인
-    if (!monthlyRiskData.length) return;
-
-    // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 차트 생성
-    const timer = setTimeout(() => {
+    // 차트 생성 함수
+    const updateChart = () => {
       // 기존 차트가 있으면 파괴
       if (monthlyRiskChartInstance.current) {
         monthlyRiskChartInstance.current.destroy();
@@ -423,74 +560,25 @@ const Dashboard = () => {
           },
         },
       });
-    }, 100);
+    };
 
+    // 100ms 지연 후 차트 생성
+    const timer = setTimeout(updateChart, 100);
     return () => clearTimeout(timer);
   }, [monthlyRiskData, isLoading, error]);
 
-  // 월간 위험 감지 데이터 가져오기 함수
-  const fetchMonthlyRiskData = async (email) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/dashboard/monthly-risk?email=${encodeURIComponent(
-          email
-        )}`
-      );
-
-      if (!response.ok) {
-        throw new Error("월간 위험 감지 데이터를 가져오는데 실패했습니다.");
-      }
-
-      const data = await response.json();
-      console.log("월간 위험 감지 API 응답:", data);
-
-      if (data.success) {
-        setMonthlyRiskData(data.data || []);
-      } else {
-        throw new Error(data.message || "월간 위험 감지 데이터 로드 실패");
-      }
-    } catch (error) {
-      console.error("월간 위험 감지 데이터 로드 오류:", error);
-      setMonthlyRiskData([]);
-    }
-  };
-
-  // 유형별 민감 정보 데이터 가져오기 함수
-  const fetchSensitiveInfoData = async (email) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/dashboard/sensitive-info?email=${encodeURIComponent(
-          email
-        )}`
-      );
-
-      if (!response.ok) {
-        throw new Error("유형별 민감 정보를 가져오는데 실패했습니다.");
-      }
-
-      const data = await response.json();
-      console.log("유형별 민감 정보 API 응답:", data);
-
-      if (data.success) {
-        setSensitiveInfoData(data.data || []);
-      } else {
-        throw new Error(data.message || "유형별 민감 정보 로드 실패");
-      }
-    } catch (error) {
-      console.error("유형별 민감 정보 로드 오류:", error);
-      setSensitiveInfoData([]);
-    }
-  };
-
   // 유형별 민감 정보 차트 생성 및 업데이트
   useEffect(() => {
-    if (isLoading || error || !sensitiveInfoChartRef.current) return;
+    if (
+      isLoading ||
+      error ||
+      !sensitiveInfoChartRef.current ||
+      !sensitiveInfoData.length
+    )
+      return;
 
-    // 데이터가 비어있는지 확인
-    if (!sensitiveInfoData.length) return;
-
-    // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 차트 생성
-    const timer = setTimeout(() => {
+    // 차트 생성 함수
+    const updateChart = () => {
       // 기존 차트가 있으면 파괴
       if (sensitiveInfoChartInstance.current) {
         sensitiveInfoChartInstance.current.destroy();
@@ -550,14 +638,16 @@ const Dashboard = () => {
           },
         },
       });
-    }, 100);
+    };
 
+    // 100ms 지연 후 차트 생성
+    const timer = setTimeout(updateChart, 100);
     return () => clearTimeout(timer);
   }, [sensitiveInfoData, isLoading, error]);
 
   // 안전 점수 차트 생성 및 업데이트
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || safetyData.currentScore === 0) return;
 
     // 기존 차트가 있으면 파괴
     if (chartInstance.current) {
@@ -619,7 +709,7 @@ const Dashboard = () => {
 
   // 체크리스트 차트 생성 및 업데이트
   useEffect(() => {
-    if (!checklistChartRef.current) return;
+    if (!checklistChartRef.current || !checklistData) return;
 
     // 기존 차트가 있으면 파괴
     if (checklistChartInstance.current) {
@@ -677,18 +767,6 @@ const Dashboard = () => {
     });
   }, [checklistData]);
 
-  // 체크리스트 데이터 로드
-  const loadChecklistData = () => {
-    try {
-      const savedData = localStorage.getItem("securityChecklist");
-      if (savedData) {
-        setChecklistData(JSON.parse(savedData));
-      }
-    } catch (error) {
-      console.error("체크리스트 데이터 로드 오류:", error);
-    }
-  };
-
   // 체크리스트 데이터 저장
   const saveChecklistData = (data) => {
     try {
@@ -734,67 +812,6 @@ const Dashboard = () => {
     const updatedList = checklistData.filter((_, i) => i !== index);
     setChecklistData(updatedList);
     saveChecklistData(updatedList);
-  };
-
-  // 대시보드 데이터 가져오기
-  const fetchDashboardData = async (email) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch(
-        `http://localhost:5000/api/dashboard/summary?email=${encodeURIComponent(
-          email
-        )}`
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API 응답:", errorText);
-        throw new Error("대시보드 데이터를 불러오는데 실패했습니다.");
-      }
-
-      const data = await response.json();
-      console.log("받은 대시보드 데이터:", data);
-
-      if (data.success) {
-        setDashboardData(data.data);
-
-        // 백엔드 API가 없는 경우 대시보드 데이터로 안전 점수 설정
-        setSafetyData({
-          currentScore: data.data.safetyScore,
-          previousScore:
-            data.data.safetyScore - parseInt(data.data.monthly.changePercent),
-          scoreDifference: parseInt(data.data.monthly.changePercent),
-          percentile: data.data.globalPercentile,
-        });
-      } else {
-        throw new Error(data.message || "데이터 로드 실패");
-      }
-    } catch (error) {
-      console.error("데이터 로드 오류:", error);
-      setError(error.message);
-
-      // 오류 발생 시 기본 데이터 설정
-      setDashboardData({
-        today: {
-          detectedCount: 0,
-          sensitiveTypes: [],
-          lastExecutionDate: null,
-          lastExecutionCount: 0,
-          changeRate: 0,
-        },
-        monthly: {
-          thisMonth: 0,
-          lastMonth: 0,
-          changePercent: 0,
-        },
-        safetyScore: 100,
-        globalPercentile: 15,
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   // 증가/감소에 따른 색상 및 기호 반환
