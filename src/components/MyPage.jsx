@@ -323,7 +323,7 @@ const ProfileEditPage = () => {
           </form>
 
           <div className={styles.dangerZone}>
-            <h3 className={styles.dangerTitle}></h3>
+            <h3 className={styles.dangerTitle}>위험 구역</h3>
             <button
               onClick={handleDeleteAccount}
               className={`${styles.button} ${styles.dangerButton}`}

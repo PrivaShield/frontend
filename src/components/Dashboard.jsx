@@ -108,7 +108,7 @@ const Dashboard = () => {
         sensitiveInfoChartInstance.current.destroy();
       }
     };
-  }, [user, navigate]); // user 상태 추가
+  }, [user, navigate, fetchSafetyData]); // fetchSafetyData 의존성 추가
 
   // 월간 데이터 가져오기
   // 1. fetchMonthlyData 함수 수정
@@ -807,14 +807,6 @@ const Dashboard = () => {
   if (isLoading) {
     return <div className={styles.loading}>로딩 중...</div>;
   }
-
-  // 가장 높은 감지 횟수 계산 (프로그레스 바용)
-  const maxCount =
-    dashboardData.today.sensitiveTypes.length > 0
-      ? Math.max(
-          ...dashboardData.today.sensitiveTypes.map((item) => item.count)
-        )
-      : 1; // 0으로 나누는 것을 방지
 
   // 최근 실행일 변화 스타일
   const dailyChangeStyle = getChangeStyle(dashboardData.today.changeRate);
