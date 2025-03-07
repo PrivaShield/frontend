@@ -55,7 +55,7 @@ const ProfileEditPage = () => {
       formData.append("profileImage", file);
 
       const response = await fetch(
-        "http://localhost:5000/api/users/update-profile-image",
+        "https://your-heroku-app.herokuapp.com/api/users/update-profile-image",
         {
           method: "POST",
           body: formData,
@@ -101,13 +101,16 @@ const ProfileEditPage = () => {
     ) {
       try {
         setError(null);
-        const response = await fetch("http://localhost:5000/api/users/delete", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: profileData.email }),
-        });
+        const response = await fetch(
+          "https://your-heroku-app.herokuapp.com/api/users/delete",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: profileData.email }),
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -143,7 +146,7 @@ const ProfileEditPage = () => {
     try {
       setError(null);
       const response = await fetch(
-        "http://localhost:5000/api/users/change-password",
+        "https://your-heroku-app.herokuapp.com/api/users/change-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -178,7 +181,7 @@ const ProfileEditPage = () => {
     try {
       setError(null);
       const response = await fetch(
-        "http://localhost:5000/api/users/update-profile",
+        "https://your-heroku-app.herokuapp.com/api/users/update-profile",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -250,7 +253,7 @@ const ProfileEditPage = () => {
             style={
               profileData.profileImage
                 ? {
-                    backgroundImage: `url(http://localhost:5000${profileData.profileImage})`,
+                    backgroundImage: `url(https://your-heroku-app.herokuapp.com${profileData.profileImage})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     cursor: "pointer",

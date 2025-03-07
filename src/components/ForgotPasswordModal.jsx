@@ -35,7 +35,7 @@ const ForgotPasswordModal = ({
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/verify-and-send",
+        "https://your-heroku-app.herokuapp.com/api/auth/verify-and-send",
         { email }
       );
 
@@ -83,7 +83,7 @@ const ForgotPasswordModal = ({
   const handleResendCode = async () => {
     try {
       const verifyResponse = await axios.post(
-        "http://localhost:5000/api/auth/send-verification-code",
+        "https://your-heroku-app.herokuapp.com/api/auth/send-verification-code",
         { email }
       );
 
@@ -140,7 +140,8 @@ const ForgotPasswordModal = ({
 
     try {
       // API 호출 경로를 skipVerification 여부에 따라 다르게 설정
-      const endpoint = "http://localhost:5000/api/auth/reset-password";
+      const endpoint =
+        "https://your-heroku-app.herokuapp.com/api/auth/reset-password";
 
       await axios.post(endpoint, {
         email,

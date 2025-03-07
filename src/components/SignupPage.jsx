@@ -72,7 +72,7 @@ const SignupPage = () => {
         console.log("회원가입 시도:", formData);
 
         const response = await axios.post(
-          "http://localhost:5000/api/auth/signup",
+          "https://your-heroku-app.herokuapp.com/api/auth/signup",
           {
             name: formData.name,
             email: formData.email,

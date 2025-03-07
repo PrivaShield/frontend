@@ -101,7 +101,7 @@ const Dashboard = () => {
       try {
         // 이전 유출 기록 (어제까지의 데이터)
         const previousLeaksResponse = await fetch(
-          `http://localhost:5000/api/dashboard/previous-leaks?email=${encodeURIComponent(
+          `https://your-heroku-app.herokuapp.com/api/dashboard/previous-leaks?email=${encodeURIComponent(
             email
           )}`
         );
@@ -117,7 +117,7 @@ const Dashboard = () => {
 
         // 현재 유출 기록 (오늘 데이터)
         const currentLeaksResponse = await fetch(
-          `http://localhost:5000/api/dashboard/current-leaks?email=${encodeURIComponent(
+          `https://your-heroku-app.herokuapp.com/api/dashboard/current-leaks?email=${encodeURIComponent(
             email
           )}`
         );
@@ -131,7 +131,7 @@ const Dashboard = () => {
 
         // 전체 사용자 데이터
         const allUsersResponse = await fetch(
-          `http://localhost:5000/api/dashboard/all-users-leaks`
+          `https://your-heroku-app.herokuapp.com/api/dashboard/all-users-leaks`
         );
 
         if (!allUsersResponse.ok) {
@@ -190,7 +190,7 @@ const Dashboard = () => {
   const fetchDashboardData = useCallback(async (email) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/summary?email=${encodeURIComponent(
+        `https://your-heroku-app.herokuapp.com/api/dashboard/summary?email=${encodeURIComponent(
           email
         )}`
       );
@@ -237,7 +237,7 @@ const Dashboard = () => {
   const fetchMonthlyData = useCallback(async (email) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/monthly-data?email=${encodeURIComponent(
+        `https://your-heroku-app.herokuapp.com/api/dashboard/monthly-data?email=${encodeURIComponent(
           email
         )}`
       );
@@ -270,7 +270,7 @@ const Dashboard = () => {
   const fetchMonthlyRiskData = useCallback(async (email) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/monthly-risk?email=${encodeURIComponent(
+        `https://your-heroku-app.herokuapp.com/api/dashboard/monthly-risk?email=${encodeURIComponent(
           email
         )}`
       );
@@ -297,7 +297,7 @@ const Dashboard = () => {
   const fetchSensitiveInfoData = useCallback(async (email) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/sensitive-info?email=${encodeURIComponent(
+        `https://your-heroku-app.herokuapp.com/api/dashboard/sensitive-info?email=${encodeURIComponent(
           email
         )}`
       );

@@ -17,7 +17,7 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "https://your-heroku-app.herokuapp.com/api/auth/login",
         { email, password }
       );
 
