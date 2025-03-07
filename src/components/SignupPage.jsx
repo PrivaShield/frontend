@@ -37,7 +37,7 @@ const SignupPage = () => {
     // 이메일 검증
     if (!formData.email.includes("@")) {
       newErrors.email = "올바른 이메일 주소를 입력해주세요";
-    } 
+    }
     // 비밀번호 검증
     if (formData.password.length < 8) {
       newErrors.password = "비밀번호는 8자 이상이어야 합니다";
@@ -65,32 +65,38 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     if (validateForm()) {
       try {
         // API 호출을 통해 회원가입 처리
         console.log("회원가입 시도:", formData);
-  
-        const response = await axios.post("http://localhost:5000/api/auth/signup", {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        });
-        
+
+        const response = await axios.post(
+          "http://localhost:5000/api/auth/signup",
+          {
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+
         console.log("회원가입 성공:", response.data);
-        
+
         // 성공 메시지 표시 (선택사항)
         alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
-        
+
         // 로그인 페이지로 리다이렉트
         navigate("/login");
-        
       } catch (error) {
         // API 호출 중 에러 발생 시
         console.error("회원가입 오류:", error);
-        
+
         // 서버에서 오는 에러 메시지가 있다면 표시
-        if (error.response && error.response.data && error.response.data.message) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
           alert(`회원가입 실패: ${error.response.data.message}`);
         } else {
           alert("회원가입에 실패했습니다. 다시 시도해주세요.");
@@ -106,7 +112,7 @@ const SignupPage = () => {
   };
 
   const handleLoginClick = () => {
-    navigate("/login"); 
+    navigate("/login");
   };
 
   return (
@@ -121,7 +127,9 @@ const SignupPage = () => {
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="name">이름</label>
+              <label className={styles.label} htmlFor="name">
+                이름
+              </label>
               <input
                 className={styles.input}
                 id="name"
@@ -132,11 +140,15 @@ const SignupPage = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.name && <span className={styles.errorText}>{errors.name}</span>}
+              {errors.name && (
+                <span className={styles.errorText}>{errors.name}</span>
+              )}
             </div>
 
             <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="email">이메일</label>
+              <label className={styles.label} htmlFor="email">
+                이메일
+              </label>
               <input
                 className={styles.input}
                 id="email"
@@ -147,11 +159,15 @@ const SignupPage = () => {
                 onChange={handleChange}
                 required
               />
-              {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+              {errors.email && (
+                <span className={styles.errorText}>{errors.email}</span>
+              )}
             </div>
 
             <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="password">비밀번호</label>
+              <label className={styles.label} htmlFor="password">
+                비밀번호
+              </label>
               <input
                 className={styles.input}
                 id="password"
@@ -165,11 +181,15 @@ const SignupPage = () => {
               <p className={styles.requirementText}>
                 8자 이상의 비밀번호를 입력해주세요
               </p>
-              {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+              {errors.password && (
+                <span className={styles.errorText}>{errors.password}</span>
+              )}
             </div>
 
             <div className={styles.inputGroup}>
-              <label className={styles.label} htmlFor="confirmPassword">비밀번호 확인</label>
+              <label className={styles.label} htmlFor="confirmPassword">
+                비밀번호 확인
+              </label>
               <input
                 className={styles.input}
                 id="confirmPassword"
@@ -181,7 +201,9 @@ const SignupPage = () => {
                 required
               />
               {errors.confirmPassword && (
-                <span className={styles.errorText}>{errors.confirmPassword}</span>
+                <span className={styles.errorText}>
+                  {errors.confirmPassword}
+                </span>
               )}
             </div>
 
@@ -200,14 +222,16 @@ const SignupPage = () => {
                   <a href="#">개인정보처리방침</a>에 동의합니다
                 </label>
                 {errors.agreeToTerms && (
-                  <span className={styles.errorText}>{errors.agreeToTerms}</span>
+                  <span className={styles.errorText}>
+                    {errors.agreeToTerms}
+                  </span>
                 )}
               </p>
             </div>
 
-            <button 
-              className={styles.button} 
-              type="submit" 
+            <button
+              className={styles.button}
+              type="submit"
               disabled={isSubmitting}
             >
               {isSubmitting ? "처리 중..." : "회원가입"}
@@ -218,7 +242,11 @@ const SignupPage = () => {
             <span className={styles.dividerText}>또는</span>
           </div>
 
-          <button className={styles.loginLink} type="button" onClick={handleLoginClick}>
+          <button
+            className={styles.loginLink}
+            type="button"
+            onClick={handleLoginClick}
+          >
             로그인하기
           </button>
         </div>
