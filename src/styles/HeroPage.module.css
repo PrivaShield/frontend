@@ -612,6 +612,18 @@ body {
   margin: 0 auto;
 }
 
+.code-container {
+  max-width: 100%;
+  max-height: 200px; /* 원하는 높이로 설정 */
+  overflow: auto; /* 내용이 넘칠 경우 스크롤 추가 */
+  white-space: pre-wrap; /* 코드에서 줄바꿈이 있을 경우 그에 맞춰 처리 */
+  padding: 10px;
+  border-radius: 5px;
+  font-family: monospace; /* 코드에 적합한 폰트 */
+  font-size: 14px; /* 코드 크기 설정 */
+  word-wrap: break-word; /* 긴 코드가 영역을 벗어나지 않도록 처리 */
+}
+
 .stepCard {
   display: flex;
   gap: 2rem;
@@ -710,8 +722,8 @@ body {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background-color: rgba(37, 99, 235, 0.1);
-  color: #94a3b8;
+  background-color: rgb(37, 100, 235);
+  color: #1b1f24;
   padding: 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -720,8 +732,8 @@ body {
 }
 
 .codeCopy:hover {
-  background-color: rgba(37, 99, 235, 0.2);
-  color: #e2e8f0;
+  background-color: rgb(199, 208, 228);
+  color: #3d444e;
 }
 
 .codeCopy svg {
