@@ -115,6 +115,20 @@ const SignupPage = () => {
     navigate("/login");
   };
 
+  const handleTermsClick = (e) => {
+    e.preventDefault();
+    // 여기에 이용약관 팝업 또는 페이지로 이동하는 로직을 구현할 수 있습니다.
+    alert("서비스 이용약관 페이지로 이동합니다.");
+    // 실제로는 navigate("/terms") 등으로 페이지 이동
+  };
+
+  const handlePrivacyClick = (e) => {
+    e.preventDefault();
+    // 여기에 개인정보처리방침 팝업 또는 페이지로 이동하는 로직을 구현할 수 있습니다.
+    alert("개인정보처리방침 페이지로 이동합니다.");
+    // 실제로는 navigate("/privacy") 등으로 페이지 이동
+  };
+
   return (
     <div className={styles.pageContainer}>
       <NavBar />
@@ -218,8 +232,14 @@ const SignupPage = () => {
               />
               <p className={styles.termsText}>
                 <label className={styles.label} htmlFor="agreeToTerms">
-                  <a href="#">서비스 이용약관</a>과{" "}
-                  <a href="#">개인정보처리방침</a>에 동의합니다
+                  <a href="/terms" onClick={handleTermsClick}>
+                    서비스 이용약관
+                  </a>
+                  과{" "}
+                  <a href="/privacy" onClick={handlePrivacyClick}>
+                    개인정보처리방침
+                  </a>
+                  에 동의합니다
                 </label>
                 {errors.agreeToTerms && (
                   <span className={styles.errorText}>

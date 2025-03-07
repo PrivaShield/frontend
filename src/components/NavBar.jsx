@@ -100,9 +100,20 @@ const NavBar = ({ scrolled }) => {
         </a>
         {user ? (
           <>
-            <a className={styles.navLink} onClick={handleDashboardClick}>
+            <button
+              className={styles.navLink}
+              onClick={handleDashboardClick}
+              style={{
+                background: "transparent",
+                border: "none",
+                padding: 0,
+                font: "inherit",
+                cursor: "pointer",
+                outline: "inherit",
+              }}
+            >
               대시보드
-            </a>
+            </button>
             <div className={styles.userInfo}>
               안녕하세요,
               <span className={styles.welcomeText} onClick={handleMyPageClick}>

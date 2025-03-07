@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext"; // UserContext 추가
 import styles from "../styles/Dashboard.module.css";
@@ -59,6 +59,128 @@ const Dashboard = () => {
     percentile: 0,
   });
 
+  // 안전 점수 계산 함수
+  const calculateSafetyScore = (leakData) => {
+    const sensitivityWeights = { 낮음: 0.1, 중간: 0.3, 높음: 0.7 };
+
+    // 카테고리별 유출 개수 집계
+    let categoryCounts = {};
+    let categoryWeights = {};
+
+    leakData.forEach(({ content_type, sensitivity_level, count }) => {
+      categoryCounts[content_type] =
+        (categoryCounts[content_type] || 0) + count;
+      categoryWeights[content_type] =
+        sensitivityWeights[sensitivity_level] || 0.3; // 기본값 중간
+    });
+
+    const categories = Object.keys(categoryCounts);
+    const counts = Object.values(categoryCounts);
+    const weights = categories.map((cat) => categoryWeights[cat]);
+
+    const N = counts.reduce((acc, val) => acc + val, 0);
+    const w_total = 0.05 + Math.min(0.02 * N, 2);
+
+    let weightedSum = 0;
+    for (let i = 0; i < categories.length; i++) {
+      weightedSum += weights[i] * counts[i];
+    }
+
+    const logTerm = Math.log(1 + w_total * N);
+    const S = 100 - weightedSum * logTerm;
+
+    return Math.min(100, Math.max(0, Math.floor(S)));
+  };
+
+  // 안전 점수 데이터 가져오기
+  const fetchSafetyData = useCallback(
+    async (email) => {
+      try {
+        // 실제로는 API 요청을 보내서 데이터를 가져와야 함
+        // 여기서는 대시보드 데이터로 계산
+
+        // 이전 유출 기록 (어제까지의 데이터)
+        const previousLeaksResponse = await fetch(
+          `http://localhost:5000/api/dashboard/previous-leaks?email=${encodeURIComponent(
+            email
+          )}`
+        );
+
+        if (!previousLeaksResponse.ok) {
+          throw new Error("이전 유출 기록을 가져오는데 실패했습니다.");
+        }
+
+        const previousLeaksData = await previousLeaksResponse.json();
+        const previousScore = calculateSafetyScore(
+          previousLeaksData.data || []
+        );
+
+        // 현재 유출 기록 (오늘 데이터)
+        const currentLeaksResponse = await fetch(
+          `http://localhost:5000/api/dashboard/current-leaks?email=${encodeURIComponent(
+            email
+          )}`
+        );
+
+        if (!currentLeaksResponse.ok) {
+          throw new Error("현재 유출 기록을 가져오는데 실패했습니다.");
+        }
+
+        const currentLeaksData = await currentLeaksResponse.json();
+        const currentScore = calculateSafetyScore(currentLeaksData.data || []);
+
+        // 전체 사용자 데이터
+        const allUsersResponse = await fetch(
+          `http://localhost:5000/api/dashboard/all-users-leaks`
+        );
+
+        if (!allUsersResponse.ok) {
+          throw new Error("전체 사용자 데이터를 가져오는데 실패했습니다.");
+        }
+
+        const allUsersData = await allUsersResponse.json();
+
+        // 각 사용자별 안전 점수 계산
+        const allScores = allUsersData.data.map((user) => {
+          return {
+            email: user.email,
+            score: calculateSafetyScore(user.leaks || []),
+          };
+        });
+
+        // 현재 사용자보다 점수가 높은 사용자 수
+        const higherScores = allScores.filter(
+          (item) => item.score > currentScore
+        ).length;
+
+        // 백분위 계산
+        const percentile =
+          allScores.length > 0
+            ? Math.round((higherScores / allScores.length) * 100)
+            : 50; // 데이터가 없을 경우 기본값
+
+        setSafetyData({
+          currentScore,
+          previousScore,
+          scoreDifference: currentScore - previousScore,
+          percentile,
+        });
+      } catch (error) {
+        console.error("안전 점수 데이터 로드 오류:", error);
+        // 오류 발생 시 기본 데이터
+        setSafetyData({
+          currentScore: dashboardData.safetyScore,
+          previousScore:
+            dashboardData.safetyScore -
+            parseInt(dashboardData.monthly.changePercent),
+          scoreDifference: parseInt(dashboardData.monthly.changePercent),
+          percentile: dashboardData.globalPercentile,
+        });
+      }
+    },
+    [dashboardData]
+  );
+
   useEffect(() => {
     // 로그인 상태 확인 - useUser 훅 사용
     if (!user) {
@@ -108,7 +230,7 @@ const Dashboard = () => {
         sensitiveInfoChartInstance.current.destroy();
       }
     };
-  }, [user, navigate]); // user 상태 추가
+  }, [user, navigate, fetchSafetyData]); // fetchSafetyData 의존성 추가
 
   // 월간 데이터 가져오기
   // 1. fetchMonthlyData 함수 수정
@@ -614,123 +736,6 @@ const Dashboard = () => {
     saveChecklistData(updatedList);
   };
 
-  // 안전 점수 계산 함수
-  const calculateSafetyScore = (leakData) => {
-    const sensitivityWeights = { 낮음: 0.1, 중간: 0.3, 높음: 0.7 };
-
-    // 카테고리별 유출 개수 집계
-    let categoryCounts = {};
-    let categoryWeights = {};
-
-    leakData.forEach(({ content_type, sensitivity_level, count }) => {
-      categoryCounts[content_type] =
-        (categoryCounts[content_type] || 0) + count;
-      categoryWeights[content_type] =
-        sensitivityWeights[sensitivity_level] || 0.3; // 기본값 중간
-    });
-
-    const categories = Object.keys(categoryCounts);
-    const counts = Object.values(categoryCounts);
-    const weights = categories.map((cat) => categoryWeights[cat]);
-
-    const N = counts.reduce((acc, val) => acc + val, 0);
-    const w_total = 0.05 + Math.min(0.02 * N, 2);
-
-    let weightedSum = 0;
-    for (let i = 0; i < categories.length; i++) {
-      weightedSum += weights[i] * counts[i];
-    }
-
-    const logTerm = Math.log(1 + w_total * N);
-    const S = 100 - weightedSum * logTerm;
-
-    return Math.min(100, Math.max(0, Math.floor(S)));
-  };
-
-  // 안전 점수 데이터 가져오기
-  const fetchSafetyData = async (email) => {
-    try {
-      // 실제로는 API 요청을 보내서 데이터를 가져와야 함
-      // 여기서는 대시보드 데이터로 계산
-
-      // 이전 유출 기록 (어제까지의 데이터)
-      const previousLeaksResponse = await fetch(
-        `http://localhost:5000/api/dashboard/previous-leaks?email=${encodeURIComponent(
-          email
-        )}`
-      );
-
-      if (!previousLeaksResponse.ok) {
-        throw new Error("이전 유출 기록을 가져오는데 실패했습니다.");
-      }
-
-      const previousLeaksData = await previousLeaksResponse.json();
-      const previousScore = calculateSafetyScore(previousLeaksData.data || []);
-
-      // 현재 유출 기록 (오늘 데이터)
-      const currentLeaksResponse = await fetch(
-        `http://localhost:5000/api/dashboard/current-leaks?email=${encodeURIComponent(
-          email
-        )}`
-      );
-
-      if (!currentLeaksResponse.ok) {
-        throw new Error("현재 유출 기록을 가져오는데 실패했습니다.");
-      }
-
-      const currentLeaksData = await currentLeaksResponse.json();
-      const currentScore = calculateSafetyScore(currentLeaksData.data || []);
-
-      // 전체 사용자 데이터
-      const allUsersResponse = await fetch(
-        `http://localhost:5000/api/dashboard/all-users-leaks`
-      );
-
-      if (!allUsersResponse.ok) {
-        throw new Error("전체 사용자 데이터를 가져오는데 실패했습니다.");
-      }
-
-      const allUsersData = await allUsersResponse.json();
-
-      // 각 사용자별 안전 점수 계산
-      const allScores = allUsersData.data.map((user) => {
-        return {
-          email: user.email,
-          score: calculateSafetyScore(user.leaks || []),
-        };
-      });
-
-      // 현재 사용자보다 점수가 높은 사용자 수
-      const higherScores = allScores.filter(
-        (item) => item.score > currentScore
-      ).length;
-
-      // 백분위 계산
-      const percentile =
-        allScores.length > 0
-          ? Math.round((higherScores / allScores.length) * 100)
-          : 50; // 데이터가 없을 경우 기본값
-
-      setSafetyData({
-        currentScore,
-        previousScore,
-        scoreDifference: currentScore - previousScore,
-        percentile,
-      });
-    } catch (error) {
-      console.error("안전 점수 데이터 로드 오류:", error);
-      // 오류 발생 시 기본 데이터
-      setSafetyData({
-        currentScore: dashboardData.safetyScore,
-        previousScore:
-          dashboardData.safetyScore -
-          parseInt(dashboardData.monthly.changePercent),
-        scoreDifference: parseInt(dashboardData.monthly.changePercent),
-        percentile: dashboardData.globalPercentile,
-      });
-    }
-  };
-
   // 대시보드 데이터 가져오기
   const fetchDashboardData = async (email) => {
     try {
@@ -807,14 +812,6 @@ const Dashboard = () => {
   if (isLoading) {
     return <div className={styles.loading}>로딩 중...</div>;
   }
-
-  // 가장 높은 감지 횟수 계산 (프로그레스 바용)
-  const maxCount =
-    dashboardData.today.sensitiveTypes.length > 0
-      ? Math.max(
-          ...dashboardData.today.sensitiveTypes.map((item) => item.count)
-        )
-      : 1; // 0으로 나누는 것을 방지
 
   // 최근 실행일 변화 스타일
   const dailyChangeStyle = getChangeStyle(dashboardData.today.changeRate);

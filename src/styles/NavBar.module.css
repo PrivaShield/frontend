@@ -71,6 +71,18 @@
   width: 100%;
 }
 
+button.navLink {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: inherit;
+  text-align: left;
+}
+
 /* Login Button */
 .loginButton {
   background-color: rgba(37, 99, 235, 0.1);
