@@ -44,7 +44,6 @@ const FeatureCard = ({ icon, title, description, delay }) => {
 const HeroPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [user, setUser] = useState(null);
   const heroContainerRef = useRef(null);
 
@@ -100,22 +99,6 @@ const HeroPage = () => {
       navigate("/dashboard");
     } else {
       navigate("/login");
-    }
-  };
-
-  const handleCopyCode = (code) => {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard
-        .writeText(code)
-        .then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        })
-        .catch((err) => {
-          console.error("복사에 실패했습니다:", err);
-        });
-    } else {
-      console.warn("Clipboard API를 지원하지 않는 브라우저입니다.");
     }
   };
 
