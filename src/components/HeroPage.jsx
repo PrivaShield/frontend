@@ -289,11 +289,6 @@ const HeroPage = () => {
                   title: "코드 붙여넣기",
                   description: "URL 필드에 아래 코드를 붙여넣습니다:",
                   code: <div className="code-container">{bookmarkletCode}</div>,
-                  icon: (
-                    <svg viewBox="0 0 24 24">
-                      <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                    </svg>
-                  ),
                 },
                 {
                   number: 4,
