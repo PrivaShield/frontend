@@ -44,6 +44,7 @@ const FeatureCard = ({ icon, title, description, delay }) => {
 const HeroPage = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [user, setUser] = useState(null);
   const heroContainerRef = useRef(null);
 
@@ -99,6 +100,22 @@ const HeroPage = () => {
       navigate("/dashboard");
     } else {
       navigate("/login");
+    }
+  };
+
+  const handleCopyCode = (code) => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(code)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch((err) => {
+          console.error("복사에 실패했습니다:", err);
+        });
+    } else {
+      console.warn("Clipboard API를 지원하지 않는 브라우저입니다.");
     }
   };
 
@@ -319,9 +336,6 @@ const HeroPage = () => {
                       <div className={styles.codeBlockContainer}>
                         <div className={styles.codeBlock}>
                           <div className={styles.codeContent}>{step.code}</div>
-                          <svg viewBox="0 0 24 24">
-                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                          </svg>
                         </div>
                       </div>
                     )}
@@ -361,6 +375,11 @@ const HeroPage = () => {
                     title: "코드 붙여넣기",
                     description: "URL 필드에 아래 코드를 붙여넣습니다:",
                     code: "***** 로그인 후 확인 가능 *****",
+                    icon: (
+                      <svg viewBox="0 0 24 24">
+                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+                      </svg>
+                    ),
                   },
                   {
                     number: 4,
