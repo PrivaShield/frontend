@@ -1,2 +1,7 @@
 [build.environment]
   REACT_APP_API_URL = "https://your-backend-api-url.com"
+
+  [[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
