@@ -4,6 +4,7 @@ const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
   // Load user from localStorage on initial load
   useEffect(() => {
@@ -11,6 +12,7 @@ export const UserProvider = ({ children }) => {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    setLoading(false); // 로드 완료 후 로딩 상태 false로 변경
   }, []);
 
   // 로그인 함수 추가 - 사용자 정보와 토큰을 함께 저장
@@ -37,7 +39,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, updateUser, logout, login }}>
+    <UserContext.Provider value={{ user, updateUser, logout, login, loading }}>
       {children}
     </UserContext.Provider>
   );

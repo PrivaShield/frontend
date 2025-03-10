@@ -7,7 +7,7 @@ import { Chart } from "chart.js/auto";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useUser(); // UserContext에서 user 가져오기
+  const { user, loading } = useUser(); // loading 상태 추가
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const chartRef = useRef(null);
@@ -99,6 +99,7 @@ const Dashboard = () => {
   const fetchSafetyData = useCallback(
     async (email) => {
       try {
+        const token = localStorage.getItem("token");
         // 이전 유출 기록 (어제까지의 데이터)
         const previousLeaksResponse = await fetch(
           `https://privashield-d6fad9e03984.herokuapp.com/api/dashboard/previous-leaks?email=${encodeURIComponent(
@@ -106,6 +107,9 @@ const Dashboard = () => {
           )}`,
           {
             credentials: "include", // 이 부분 추가
+            headers: {
+              Authorization: `Bearer ${token}`, // 토큰 추가
+            },
           }
         );
 
@@ -125,6 +129,9 @@ const Dashboard = () => {
           )}`,
           {
             credentials: "include", // 이 부분 추가
+            headers: {
+              Authorization: `Bearer ${token}`, // 토큰 추가
+            },
           }
         );
 
@@ -137,7 +144,12 @@ const Dashboard = () => {
 
         // 전체 사용자 데이터
         const allUsersResponse = await fetch(
-          `https://privashield-d6fad9e03984.herokuapp.com/api/dashboard/all-users-leaks`
+          `https://privashield-d6fad9e03984.herokuapp.com/api/dashboard/all-users-leaks`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // 토큰 추가
+            },
+          }
         );
 
         if (!allUsersResponse.ok) {
@@ -195,12 +207,16 @@ const Dashboard = () => {
   // 대시보드 데이터 가져오기
   const fetchDashboardData = useCallback(async (email) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `https://privashield-d6fad9e03984.herokuapp.com/api/dashboard/summary?email=${encodeURIComponent(
           email
         )}`,
         {
           credentials: "include", // 이 부분 추가
+          headers: {
+            Authorization: `Bearer ${token}`, // 토큰 추가
+          },
         }
       );
 
@@ -245,12 +261,16 @@ const Dashboard = () => {
   // 월간 데이터 가져오기
   const fetchMonthlyData = useCallback(async (email) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `https://privashield-d6fad9e03984.herokuapp.com/api/dashboard/monthly-data?email=${encodeURIComponent(
           email
         )}`,
         {
           credentials: "include", // 이 부분 추가
+          headers: {
+            Authorization: `Bearer ${token}`, // 토큰 추가
+          },
         }
       );
 
@@ -281,12 +301,16 @@ const Dashboard = () => {
   // 월간 위험 감지 데이터 가져오기 함수
   const fetchMonthlyRiskData = useCallback(async (email) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `https://privashield-d6fad9e03984.herokuapp.com/api/dashboard/monthly-risk?email=${encodeURIComponent(
           email
         )}`,
         {
           credentials: "include", // 이 부분 추가
+          headers: {
+            Authorization: `Bearer ${token}`, // 토큰 추가
+          },
         }
       );
 
@@ -311,12 +335,16 @@ const Dashboard = () => {
   // 유형별 민감 정보 데이터 가져오기 함수
   const fetchSensitiveInfoData = useCallback(async (email) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `https://privashield-d6fad9e03984.herokuapp.com/api/dashboard/sensitive-info?email=${encodeURIComponent(
           email
         )}`,
         {
           credentials: "include", // 이 부분 추가
+          headers: {
+            Authorization: `Bearer ${token}`, // 토큰 추가
+          },
         }
       );
 
@@ -352,11 +380,26 @@ const Dashboard = () => {
 
   // 주요 데이터 로딩
   useEffect(() => {
-    // 로그인 상태 확인
+    // UserContext의 로딩이 완료될 때까지 기다림
+    if (loading) return;
+
+    // 로그인 상태 확인 (로딩이 완료된 후)
     if (!user) {
-      alert("로그인이 필요합니다.");
-      // 절대 경로 대신 상대 경로 사용
-      window.location.href = "./login";
+      console.log("로그인이 필요합니다. 현재 user 상태:", user);
+      // 로컬 스토리지에 사용자 정보가 있는지 다시 한번 확인
+      const storedUser = localStorage.getItem("user");
+      const storedToken = localStorage.getItem("token");
+
+      if (storedUser && storedToken) {
+        console.log(
+          "로컬 스토리지에 사용자 정보가 있습니다. 새로고침 후 다시 시도하세요."
+        );
+        // 페이지 새로고침 (선택적)
+        // window.location.reload();
+      } else {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+      }
       return;
     }
 
@@ -422,6 +465,7 @@ const Dashboard = () => {
     fetchMonthlyRiskData,
     fetchSensitiveInfoData,
     loadChecklistData,
+    loading, // loading 상태 추가
   ]);
 
   // 월간 차트 생성 및 업데이트
@@ -845,7 +889,7 @@ const Dashboard = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return <div className={styles.loading}>로딩 중...</div>;
   }
 
