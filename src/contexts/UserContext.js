@@ -13,6 +13,13 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
+  // 로그인 함수 추가 - 사용자 정보와 토큰을 함께 저장
+  const login = (userData, token) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", token);
+    setUser(userData);
+  };
+
   // Update user and store in localStorage
   const updateUser = (userData) => {
     setUser((prevUser) => {
@@ -30,7 +37,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, updateUser, logout }}>
+    <UserContext.Provider value={{ user, updateUser, logout, login }}>
       {children}
     </UserContext.Provider>
   );

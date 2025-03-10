@@ -355,7 +355,8 @@ const Dashboard = () => {
     // 로그인 상태 확인
     if (!user) {
       alert("로그인이 필요합니다.");
-      navigate("/login");
+      // 절대 경로 대신 상대 경로 사용
+      window.location.href = "./login";
       return;
     }
 
