@@ -7,33 +7,53 @@ import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
-  const { user, updateUser } = useUser();
+  const { user, updateUser, loading } = useUser(); // loading 상태 추가
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
     password: "",
     profileImage: "",
   });
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const fileInputRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    // UserContext의 로딩이 완료된 후에 검사
+    if (!loading) {
+      // 로컬 스토리지에서 직접 확인
+      const storedUser = localStorage.getItem("user");
 
-    setProfileData({
-      name: user.user_name || "",
-      email: user.email || "",
-      password: "",
-      profileImage: user.profile_image || "",
-    });
-    setLoading(false);
-  }, [user, navigate]);
+      // user 상태가 없지만 로컬 스토리지에 있으면 페이지 유지
+      if (!user && !storedUser) {
+        navigate("/login");
+        return;
+      }
+
+      // 로컬 스토리지에서 사용자 정보 가져오기
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        setProfileData({
+          name: userData.user_name || "",
+          email: userData.email || "",
+          password: "",
+          profileImage: userData.profile_image || "",
+        });
+      } else if (user) {
+        // user 상태가 있으면 그대로 사용
+        setProfileData({
+          name: user.user_name || "",
+          email: user.email || "",
+          password: "",
+          profileImage: user.profile_image || "",
+        });
+      }
+
+      setPageLoading(false);
+    }
+  }, [user, loading, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -230,7 +250,7 @@ const ProfileEditPage = () => {
     }
   }, [error, successMessage]);
 
-  if (loading) {
+  if (loading || pageLoading) {
     return <div className={styles.loading}>로딩 중...</div>;
   }
 

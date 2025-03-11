@@ -10,7 +10,12 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("로컬 스토리지 사용자 정보 파싱 오류:", error);
+        localStorage.removeItem("user"); // 손상된 데이터 제거
+      }
     }
     setLoading(false); // 로드 완료 후 로딩 상태 false로 변경
   }, []);
@@ -25,6 +30,12 @@ export const UserProvider = ({ children }) => {
   // Update user and store in localStorage
   const updateUser = (userData) => {
     setUser((prevUser) => {
+      if (!prevUser) {
+        // prevUser가 null이면 로컬 스토리지에서 가져오기 시도
+        const storedUser = localStorage.getItem("user");
+        prevUser = storedUser ? JSON.parse(storedUser) : {};
+      }
+
       const newUser = { ...prevUser, ...userData };
       localStorage.setItem("user", JSON.stringify(newUser));
       return newUser;
