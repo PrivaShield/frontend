@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
+import { useUser } from "../contexts/UserContext"; // 전역 상태 사용
 import styles from "../styles/MyPage.module.css";
 import NavBar from "./NavBar";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
-  const { user, updateUser, loading: userLoading } = useUser();
+  const { user, updateUser } = useUser();
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -20,245 +20,20 @@ const ProfileEditPage = () => {
   const fileInputRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 디버깅을 위한 로깅
   useEffect(() => {
-    console.log("User context state:", user);
-    console.log("Local storage user:", localStorage.getItem("user"));
-    console.log("Local storage token:", localStorage.getItem("token"));
-
-    // API 엔드포인트 테스트 로깅
-    const testEndpoints = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const storedUser = localStorage.getItem("user");
-        if (!storedUser) return;
-
-        const parsedUser = JSON.parse(storedUser);
-        const email = parsedUser.email;
-
-        if (!email) return;
-
-        // 다양한 엔드포인트 테스트
-        const endpoints = [
-          `/users/info?email=${encodeURIComponent(email)}`,
-          `/api/users/info?email=${encodeURIComponent(email)}`,
-          `/api/users/profile?email=${encodeURIComponent(email)}`,
-        ];
-
-        for (const endpoint of endpoints) {
-          try {
-            console.log(`테스트 중인 엔드포인트: ${endpoint}`);
-            const response = await fetch(
-              `https://privashield-d6fad9e03984.herokuapp.com${endpoint}`,
-              {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            console.log(`엔드포인트 ${endpoint} 응답 상태:`, response.status);
-            if (response.ok) {
-              const data = await response.json();
-              console.log(`엔드포인트 ${endpoint} 응답 데이터:`, data);
-              break;
-            }
-          } catch (e) {
-            console.error(`엔드포인트 ${endpoint} 요청 실패:`, e);
-          }
-        }
-      } catch (error) {
-        console.error("엔드포인트 테스트 오류:", error);
-      }
-    };
-
-    if (user) {
-      testEndpoints();
-    }
-  }, [user]);
-
-  // 사용자 정보 로드
-  useEffect(() => {
-    // userLoading이 false가 되었고(로드 완료) 그리고 user가 없을 때만 로그인으로 리디렉션
-    if (!userLoading && !user) {
-      // 로컬 스토리지에서 직접 확인 (추가 안전장치)
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) {
-        navigate("/login");
-        return;
-      } else {
-        // 로컬 스토리지에 사용자 정보가 있지만 컨텍스트에 없는 경우
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          updateUser(parsedUser); // 컨텍스트 업데이트
-
-          setProfileData({
-            name: parsedUser.user_name || "",
-            email: parsedUser.email || "",
-            password: "",
-            profileImage: parsedUser.profile_image || "",
-          });
-          setLoading(false);
-          return;
-        } catch (error) {
-          console.error("Failed to parse stored user:", error);
-          navigate("/login");
-          return;
-        }
-      }
+    if (!user) {
+      navigate("/login");
+      return;
     }
 
-    // 컨텍스트에서 사용자 정보가 로드되었을 때
-    if (!userLoading && user) {
-      setProfileData({
-        name: user.user_name || "",
-        email: user.email || "",
-        password: "",
-        profileImage: user.profile_image || "",
-      });
-      setLoading(false);
-    }
-  }, [user, navigate, updateUser, userLoading]);
-
-  // 프로필 정보 서버에서 다시 가져오기 (선택적)
-  const fetchProfileData = useCallback(async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      // 로컬 스토리지에서 이메일 가져오기
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) return;
-
-      const parsedUser = JSON.parse(storedUser);
-      const email = parsedUser.email;
-
-      if (!email) return;
-
-      // 백엔드 코드 분석 결과 쿼리 파라미터로 이메일을 전송해야 함
-      // 여러 경로를 시도
-      let response;
-
-      // 첫 번째 시도: /users/info
-      try {
-        response = await fetch(
-          `https://privashield-d6fad9e03984.herokuapp.com/users/info?email=${encodeURIComponent(
-            email
-          )}`,
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      } catch (e) {
-        console.error("첫 번째 엔드포인트 시도 실패:", e);
-      }
-
-      // 두 번째 시도: /api/users/info
-      if (!response || !response.ok) {
-        try {
-          response = await fetch(
-            `https://privashield-d6fad9e03984.herokuapp.com/api/users/info?email=${encodeURIComponent(
-              email
-            )}`,
-            {
-              method: "GET",
-              credentials: "include",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-        } catch (e) {
-          console.error("두 번째 엔드포인트 시도 실패:", e);
-        }
-      }
-
-      // 세 번째 시도: /api/users/profile
-      if (!response || !response.ok) {
-        try {
-          response = await fetch(
-            `https://privashield-d6fad9e03984.herokuapp.com/api/users/profile?email=${encodeURIComponent(
-              email
-            )}`,
-            {
-              method: "GET",
-              credentials: "include",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-        } catch (e) {
-          console.error("세 번째 엔드포인트 시도 실패:", e);
-        }
-      }
-
-      if (response && response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          // 데이터 구조에 따라 필드명 매핑 처리
-          updateUser({
-            user_name: data.data.name || data.data.user_name || "",
-            email: data.data.email || "",
-            profile_image:
-              data.data.profileImage || data.data.profile_image || "",
-          });
-
-          setProfileData({
-            name: data.data.name || data.data.user_name || "",
-            email: data.data.email || "",
-            password: "",
-            profileImage:
-              data.data.profileImage || data.data.profile_image || "",
-          });
-        }
-      } else {
-        console.log("서버 요청 실패, 로컬 스토리지 데이터 사용");
-        // 서버 요청 실패시 로컬 스토리지 데이터 사용
-        setProfileData({
-          name: parsedUser.user_name || "",
-          email: parsedUser.email || "",
-          password: "",
-          profileImage: parsedUser.profile_image || "",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to fetch profile data:", error);
-    }
-  }, [updateUser]);
-
-  // 컴포넌트 마운트 시 프로필 정보 다시 가져오기
-  useEffect(() => {
-    if (!userLoading) {
-      // 로컬 스토리지의 데이터를 먼저 사용하여 UI를 빠르게 보여줌
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setProfileData({
-            name: parsedUser.user_name || "",
-            email: parsedUser.email || "",
-            password: "",
-            profileImage: parsedUser.profile_image || "",
-          });
-          setLoading(false);
-        } catch (e) {
-          console.error("Failed to parse stored user:", e);
-        }
-      }
-
-      // 그 후 서버에서 최신 데이터 가져오기 시도
-      fetchProfileData();
-    }
-  }, [userLoading, fetchProfileData]);
+    setProfileData({
+      name: user.user_name || "",
+      email: user.email || "",
+      password: "",
+      profileImage: user.profile_image || "",
+    });
+    setLoading(false);
+  }, [user, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -279,17 +54,11 @@ const ProfileEditPage = () => {
       formData.append("email", profileData.email);
       formData.append("profileImage", file);
 
-      // 토큰 가져오기
-      const token = localStorage.getItem("token");
-
       const response = await fetch(
         "https://privashield-d6fad9e03984.herokuapp.com/api/users/update-profile-image",
         {
           method: "POST",
-          credentials: "include",
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
+          credentials: "include", // 이 부분 추가
           body: formData,
         }
       );
@@ -333,17 +102,13 @@ const ProfileEditPage = () => {
     ) {
       try {
         setError(null);
-        // 토큰 가져오기
-        const token = localStorage.getItem("token");
-
         const response = await fetch(
           "https://privashield-d6fad9e03984.herokuapp.com/api/users/delete",
           {
             method: "POST",
-            credentials: "include",
+            credentials: "include", // 이 부분 추가
             headers: {
               "Content-Type": "application/json",
-              Authorization: token ? `Bearer ${token}` : "",
             },
             body: JSON.stringify({ email: profileData.email }),
           }
@@ -361,8 +126,6 @@ const ProfileEditPage = () => {
         if (data.success) {
           alert("회원 탈퇴가 완료되었습니다.");
           localStorage.removeItem("userEmail");
-          localStorage.removeItem("user");
-          localStorage.removeItem("token");
           window.location.href = "/";
         } else {
           throw new Error(
@@ -384,18 +147,12 @@ const ProfileEditPage = () => {
 
     try {
       setError(null);
-      // 토큰 가져오기
-      const token = localStorage.getItem("token");
-
       const response = await fetch(
         "https://privashield-d6fad9e03984.herokuapp.com/api/users/change-password",
         {
           method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
+          credentials: "include", // 이 부분 추가
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: profileData.email,
             newPassword: profileData.password,
@@ -426,18 +183,12 @@ const ProfileEditPage = () => {
     e.preventDefault();
     try {
       setError(null);
-      // 토큰 가져오기
-      const token = localStorage.getItem("token");
-
       const response = await fetch(
         "https://privashield-d6fad9e03984.herokuapp.com/api/users/update-profile",
         {
           method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
-          },
+          credentials: "include", // 이 부분 추가
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: profileData.email,
             name: profileData.name,
@@ -479,8 +230,7 @@ const ProfileEditPage = () => {
     }
   }, [error, successMessage]);
 
-  // userLoading과 loading 둘 다 고려하여 로딩 상태 표시
-  if (userLoading || loading) {
+  if (loading) {
     return <div className={styles.loading}>로딩 중...</div>;
   }
 
@@ -507,9 +257,7 @@ const ProfileEditPage = () => {
             style={
               profileData.profileImage
                 ? {
-                    backgroundImage: profileData.profileImage.startsWith("http")
-                      ? `url(${profileData.profileImage})`
-                      : `url(https://privashield-d6fad9e03984.herokuapp.com${profileData.profileImage})`,
+                    backgroundImage: `url(https://privashield-d6fad9e03984.herokuapp.com${profileData.profileImage})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     cursor: "pointer",
