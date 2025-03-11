@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../contexts/UserContext"; // 전역 상태 사용
+import { useUser } from "../contexts/UserContext";
 import styles from "../styles/MyPage.module.css";
 import NavBar from "./NavBar";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const ProfileEditPage = () => {
   const navigate = useNavigate();
-  const { user, updateUser } = useUser();
+  const { user, updateUser, loading: userLoading } = useUser();
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -20,20 +20,96 @@ const ProfileEditPage = () => {
   const fileInputRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // 디버깅을 위한 로깅
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
+    console.log("User context state:", user);
+    console.log("Local storage user:", localStorage.getItem("user"));
+    console.log("Local storage token:", localStorage.getItem("token"));
+  }, [user]);
+
+  // 사용자 정보 로드
+  useEffect(() => {
+    // userLoading이 false가 되었고(로드 완료) 그리고 user가 없을 때만 로그인으로 리디렉션
+    if (!userLoading && !user) {
+      // 로컬 스토리지에서 직접 확인 (추가 안전장치)
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) {
+        navigate("/login");
+        return;
+      } else {
+        // 로컬 스토리지에 사용자 정보가 있지만 컨텍스트에 없는 경우
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          updateUser(parsedUser); // 컨텍스트 업데이트
+
+          setProfileData({
+            name: parsedUser.user_name || "",
+            email: parsedUser.email || "",
+            password: "",
+            profileImage: parsedUser.profile_image || "",
+          });
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error("Failed to parse stored user:", error);
+          navigate("/login");
+          return;
+        }
+      }
     }
 
-    setProfileData({
-      name: user.user_name || "",
-      email: user.email || "",
-      password: "",
-      profileImage: user.profile_image || "",
-    });
-    setLoading(false);
-  }, [user, navigate]);
+    // 컨텍스트에서 사용자 정보가 로드되었을 때
+    if (!userLoading && user) {
+      setProfileData({
+        name: user.user_name || "",
+        email: user.email || "",
+        password: "",
+        profileImage: user.profile_image || "",
+      });
+      setLoading(false);
+    }
+  }, [user, navigate, updateUser, userLoading]);
+
+  // 프로필 정보 서버에서 다시 가져오기 (선택적)
+  const fetchProfileData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await fetch(
+        "https://privashield-d6fad9e03984.herokuapp.com/api/users/profile",
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          updateUser(data.data);
+          setProfileData({
+            name: data.data.user_name || "",
+            email: data.data.email || "",
+            password: "",
+            profileImage: data.data.profile_image || "",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch profile data:", error);
+    }
+  };
+
+  // 컴포넌트 마운트 시 프로필 정보 다시 가져오기
+  useEffect(() => {
+    if (!userLoading) {
+      fetchProfileData();
+    }
+  }, [userLoading]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,11 +130,17 @@ const ProfileEditPage = () => {
       formData.append("email", profileData.email);
       formData.append("profileImage", file);
 
+      // 토큰 가져오기
+      const token = localStorage.getItem("token");
+
       const response = await fetch(
         "https://privashield-d6fad9e03984.herokuapp.com/api/users/update-profile-image",
         {
           method: "POST",
-          credentials: "include", // 이 부분 추가
+          credentials: "include",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
           body: formData,
         }
       );
@@ -102,13 +184,17 @@ const ProfileEditPage = () => {
     ) {
       try {
         setError(null);
+        // 토큰 가져오기
+        const token = localStorage.getItem("token");
+
         const response = await fetch(
           "https://privashield-d6fad9e03984.herokuapp.com/api/users/delete",
           {
             method: "POST",
-            credentials: "include", // 이 부분 추가
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
+              Authorization: token ? `Bearer ${token}` : "",
             },
             body: JSON.stringify({ email: profileData.email }),
           }
@@ -126,6 +212,8 @@ const ProfileEditPage = () => {
         if (data.success) {
           alert("회원 탈퇴가 완료되었습니다.");
           localStorage.removeItem("userEmail");
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
           window.location.href = "/";
         } else {
           throw new Error(
@@ -147,12 +235,18 @@ const ProfileEditPage = () => {
 
     try {
       setError(null);
+      // 토큰 가져오기
+      const token = localStorage.getItem("token");
+
       const response = await fetch(
         "https://privashield-d6fad9e03984.herokuapp.com/api/users/change-password",
         {
           method: "POST",
-          credentials: "include", // 이 부분 추가
-          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
           body: JSON.stringify({
             email: profileData.email,
             newPassword: profileData.password,
@@ -183,12 +277,18 @@ const ProfileEditPage = () => {
     e.preventDefault();
     try {
       setError(null);
+      // 토큰 가져오기
+      const token = localStorage.getItem("token");
+
       const response = await fetch(
         "https://privashield-d6fad9e03984.herokuapp.com/api/users/update-profile",
         {
           method: "POST",
-          credentials: "include", // 이 부분 추가
-          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
           body: JSON.stringify({
             email: profileData.email,
             name: profileData.name,
@@ -230,7 +330,8 @@ const ProfileEditPage = () => {
     }
   }, [error, successMessage]);
 
-  if (loading) {
+  // userLoading과 loading 둘 다 고려하여 로딩 상태 표시
+  if (userLoading || loading) {
     return <div className={styles.loading}>로딩 중...</div>;
   }
 
