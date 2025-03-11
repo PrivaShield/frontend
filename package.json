@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://privashield-d6fad9e03984.herokuapp.com",
   "dependencies": {
     "axios": "^1.8.1",
     "chart.js": "^4.4.8",
