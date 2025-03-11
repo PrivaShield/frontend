@@ -10,42 +10,67 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const storedUser = localStorage.getItem("user");
+        // 토큰은 있지만 사용자 정보가 없는 경우
         const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
 
-        if (storedUser && token) {
-          // 토큰 유효성 검증 (선택적)
+        if (token && !storedUser) {
+          // 토큰으로 사용자 정보 가져오기 시도
+          // 사용자 이메일을 jwt 디코딩으로 추출
           try {
-            const response = await fetch(
-              "https://privashield-d6fad9e03984.herokuapp.com/api/users/profile",
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-                credentials: "include",
-              }
+            // JWT 디코딩 (간단한 방식)
+            const base64Url = token.split(".")[1];
+            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+            const jsonPayload = decodeURIComponent(
+              atob(base64)
+                .split("")
+                .map(function (c) {
+                  return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+                })
+                .join("")
             );
 
-            if (response.ok) {
-              // 서버 응답이 정상이면 저장된 사용자 정보 사용
-              setUser(JSON.parse(storedUser));
-            } else {
-              // 토큰이 유효하지 않으면 로그아웃 처리
-              localStorage.removeItem("user");
-              localStorage.removeItem("token");
-              setUser(null);
+            const decodedToken = JSON.parse(jsonPayload);
+
+            if (decodedToken.email) {
+              // 토큰에서 이메일을 가져왔으므로 사용자 정보 요청
+              const response = await fetch(
+                `https://privashield-d6fad9e03984.herokuapp.com/api/users/info?email=${encodeURIComponent(
+                  decodedToken.email
+                )}`,
+                {
+                  method: "GET",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                  credentials: "include",
+                }
+              );
+
+              if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                  // 사용자 정보를 로컬 스토리지와 컨텍스트에 저장
+                  const userData = {
+                    user_name: data.data.name || data.data.user_name,
+                    email: data.data.email,
+                    profile_image:
+                      data.data.profileImage || data.data.profile_image,
+                  };
+
+                  localStorage.setItem("user", JSON.stringify(userData));
+                  setUser(userData);
+                }
+              }
             }
           } catch (error) {
-            console.error("Failed to verify token:", error);
-            // 네트워크 오류 등이 발생해도 일단 저장된 사용자 정보 사용
-            setUser(JSON.parse(storedUser));
+            console.error("토큰 디코딩 실패:", error);
           }
+        } else if (storedUser) {
+          setUser(JSON.parse(storedUser));
         }
       } catch (error) {
-        console.error("Failed to load user from localStorage:", error);
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
+        console.error("Failed to verify user:", error);
       } finally {
         setLoading(false);
       }
