@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import styles from "../styles/MyPage.module.css";
@@ -71,7 +71,7 @@ const ProfileEditPage = () => {
   }, [user, navigate, updateUser, userLoading]);
 
   // 프로필 정보 서버에서 다시 가져오기 (선택적)
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -102,14 +102,14 @@ const ProfileEditPage = () => {
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
     }
-  };
+  }, [updateUser]);
 
   // 컴포넌트 마운트 시 프로필 정보 다시 가져오기
   useEffect(() => {
     if (!userLoading) {
       fetchProfileData();
     }
-  }, [userLoading]);
+  }, [userLoading, fetchProfileData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
